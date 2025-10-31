@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
 
-
 def coco_category_dist(coco) -> Figure: # Updated return type
     """Generates a bar plot of the COCO dataset category distribution.
 

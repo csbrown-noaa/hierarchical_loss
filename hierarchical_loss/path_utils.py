@@ -327,6 +327,19 @@ def batch_filter_empty_paths(predicted_boxes: list[torch.Tensor], predicted_path
 
 
 def optimal_hierarchical_paths(class_scores: list[torch.Tensor], hierarchy: dict[int, int]) -> tuple[list[list[list[int]]], list[list[torch.Tensor]]]:
+    """
+    .. deprecated:: 0.X.X
+       This function is deprecated as it re-computes the hierarchy
+       on every call, causing a performance bottleneck.
+       Use a `Hierarchy` object to pre-compute the `inverted_tree`
+       and `roots`, and then call `optimal_hierarchical_path` directly.
+    """
+    inverted_tree = construct_parent_childtensor_tree(hierarchy, device=class_scores[0].device)
+    roots = torch.tensor(get_roots(hierarchy), device=class_scores[0].device)
+    return optimal_hierarchical_path(class_scores, inverted_tree, roots)
+
+
+def optimal_hierarchical_path(class_scores: list[torch.Tensor], inverted_tree: dict[int, torch.Tensor], roots: torch.Tensor) -> tuple[list[list[list[int]]], list[list[torch.Tensor]]]:
     """Finds optimal paths and extracts their corresponding scores.
 
     This function wraps `get_optimal_ancestral_chain` to find the
@@ -339,8 +352,11 @@ def optimal_hierarchical_paths(class_scores: list[torch.Tensor], hierarchy: dict
         A list of confidence tensors, one per batch item. Each tensor
         should have shape (C, N), where C is the number of classes
         and N is the number of detections.
-    hierarchy : dict[int, int]
-        The class hierarchy in `{child_id: parent_id}` format.
+    inverted_tree : dict[int, torch.Tensor]
+        The class hierarchy in `{parent_id: tensor([child1, child2, ...])}`
+        format.
+    roots : torch.Tensor
+        A 1D tensor containing the integer IDs of the root nodes.
 
     Returns
     -------
@@ -366,15 +382,14 @@ def optimal_hierarchical_paths(class_scores: list[torch.Tensor], hierarchy: dict
     ...     [ 0.,  2.]   # 6 (Child of 2)
     ... ], dtype=torch.float32)
     >>> class_scores = [scores]
-    >>> paths, path_scores = optimal_hierarchical_paths(class_scores, hierarchy)
+    >>> inverted_tree = construct_parent_childtensor_tree(hierarchy, device=class_scores[0].device)
+    >>> roots = torch.tensor(get_roots(hierarchy), device=class_scores[0].device)
+    >>> paths, path_scores = optimal_hierarchical_path(class_scores, inverted_tree, roots)
     >>> paths
     [[[0, 1, 4], [0, 2, 5]]]
     >>> path_scores
     [[tensor([10.,  5.,  8.]), tensor([10.,  5.,  8.])]]
     """
-    #TODO cahce this
-    inverted_tree = construct_parent_childtensor_tree(hierarchy)
-    roots = get_roots(hierarchy)
     bpaths = []
     bscores = []
     for b, confidence in enumerate(class_scores):
@@ -384,7 +399,7 @@ def optimal_hierarchical_paths(class_scores: list[torch.Tensor], hierarchy: dict
             confidence_row = confidence[..., i]
             path = []
             path_score = []
-            siblings = torch.tensor(roots, device=confidence.device)
+            siblings = roots
             while siblings is not None:
                 best = confidence_row.index_select(0, siblings).argmax()
                 best_node_id = int(siblings[best])
