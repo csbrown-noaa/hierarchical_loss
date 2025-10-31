@@ -1,4 +1,4 @@
-site_name: https://github.com/csbrown-noaa/hierarchical_loss
+site_name: hierarchical_loss
 
 repo_url: https://github.com/csbrown-noaa/hierarchical_loss
 
@@ -26,4 +26,13 @@ nav:
   - Contributing: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Code Reference:
-      - Some Module: api/some_module.md
+      - COCO utilities: api/coco_utils.md
+      - Hierarchy paths utilities: api/path_utils.md
+      - Generic tree utilities: api/tree_utils.md
+      - WORMS utilities: api/worms_utils.md
+      - Visualization utilities: api/viz_utils.md
+      - General utilities: api/utils.md
+      - Hierarchy tensor utilities: api/hierarchy_tensor_utils.md
+      - Hierarchical loss: api/hierarchical_loss.md
+      - Hierarchy caching class: api/hierarchy.md
+

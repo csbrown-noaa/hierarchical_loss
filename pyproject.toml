@@ -10,6 +10,9 @@ authors = [
     { name = "CScott Brown" },
 ]
 dependencies = [
+    "torch",
+    "numpy",
+    "matplotlib"
 ]
 readme = "README.md"
 classifiers = [
