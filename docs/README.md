@@ -20,6 +20,8 @@ $$ P(\text{category}[i]) = P(\text{category}[i] | \text{parent}(\text{category}[
 
 Given these marginal confidences, we can compute the ordinary BCE loss.
 
+Likely, the point of entry users will be most interested in is the `Hierarchy` class, which handles caching various views of the hierarchy, and the `hierarchical_loss` function.  You will need to incorporate the loss into your existing training regimen.  After training, one may find useful the `optimal_hierarchical_path` and various `...truncate...` functions in `path_utils` for predictive purposes.  Note that the standard predictive "choose the category with the highest confidence" strategy does not work here, since the marginal probability of a child will always necessarily be less than the marginal probability of the parent.  
+
 # Installation
 
     pip install git+https://github.com/csbrown-noaa/hierarchical_loss.git
