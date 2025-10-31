@@ -103,6 +103,8 @@ def logsumexp_over_siblings(flat_scores: torch.Tensor, sibling_mask: torch.Tenso
     logsumexp: tensor (BxC)
         the logsumexp over all of the siblings of each category.  logsumexp[i,j] == logsumexp[i,k] if j,k are siblings.
 
+    Examples
+    --------
     >>> # Example 0: Normal operation
     >>> flat_scores = torch.tensor([
     ...     [0.1, 0.5, 2.0, 3.0],  # Batch 1
