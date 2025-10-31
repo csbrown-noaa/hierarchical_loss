@@ -3,11 +3,11 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = TODO: pick a project name
+name = "hierarchical_loss"
 version = "0.1.0"
-description = TODO: input a project description
+description = "a pytorch library for computing loss over hierarchical categorical output"
 authors = [
-    { name = TODO: your name here },
+    { name = "CScott Brown" },
 ]
 dependencies = [
 ]

@@ -1,6 +1,6 @@
-site_name: TODO: your repository name
+site_name: https://github.com/csbrown-noaa/hierarchical_loss
 
-repo_url: TODO: your repository url
+repo_url: https://github.com/csbrown-noaa/hierarchical_loss
 
 theme:
   name: material
