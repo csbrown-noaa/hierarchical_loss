@@ -1,10 +1,28 @@
-# repo name
+# PyTorch Hierarchical Loss
 
-Describe your project here
+This package provides functions to compute Binary Cross Entropy loss for hierarchical categories.
+
+The general strategy is to use the "flat" predictions from a general detection or classification model.
+  These predictions are then interpreted as *conditional* logit confidences.
+  This allows us to use the existing model architecture as-is, and interpret the output as hierarchical only changing how we interpret the predictions.
+
+More specifically, suppose that we have $n$ categories, and a hierarchical structure over these categories.  Suppose that our model predicts a vector $V$ for some object or image.  We interpret the logit value in index i to be:
+
+$$ V[i] := logit(P(category[i] | parent(category[i]))) $$
+
+We can compute the raw conditional probability using a sigmoid function.
+
+$$ sigmoid(V[i]) := P(category[i] | parent(category[i])) $$
+
+We can use these to compute marginal confidences at arbitrary locations in the hierarchy:
+
+$$ P(category[i]) = P(category[i] | parent(category[i])) * P(parent(category[i]) | parent(parent(category[i]))) \ldots $$
+
+Given these marginal confidences, we can compute the ordinary BCE loss.
 
 # Installation
 
-Put installation instructions here
+    pip install git+https://github.com/csbrown-noaa/hierarchical_loss.git
 
 # Contributing
 
