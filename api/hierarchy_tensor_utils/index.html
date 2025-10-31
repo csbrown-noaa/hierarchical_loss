@@ -1,0 +1,4116 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../utils/">
+      
+      
+        <link rel="next" href="../hierarchical_loss/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>Hierarchy tensor utilities - hierarchical_loss</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#utilities-for-working-with-hierarchies-as-tensors" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="hierarchical_loss" class="md-header__button md-logo" aria-label="hierarchical_loss" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            hierarchical_loss
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Hierarchy tensor utilities
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/csbrown-noaa/hierarchical_loss" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CODE_OF_CONDUCT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Code of Conduct
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../coco_utils/" class="md-tabs__link">
+          
+  
+  
+  Code Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="hierarchical_loss" class="md-nav__button md-logo" aria-label="hierarchical_loss" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    hierarchical_loss
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/csbrown-noaa/hierarchical_loss" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CODE_OF_CONDUCT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code of Conduct
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Code Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coco_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    COCO utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../path_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hierarchy paths utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tree_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Generic tree utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../worms_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    WORMS utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../viz_utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Visualization utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    General utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Hierarchy tensor utilities
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hierarchy tensor utilities
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      hierarchy_tensor_utils
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.accumulate_hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      accumulate_hierarchy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_index_tensor" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_hierarchy_index_tensor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_sibling_mask" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_hierarchy_sibling_mask
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_parent_tensor" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_parent_tensor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.expand_target_hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      expand_target_hierarchy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.find_closest_permitted_parent" class="md-nav__link">
+    <span class="md-ellipsis">
+      find_closest_permitted_parent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.get_ancestor_chain_lens" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_ancestor_chain_lens
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.get_roots" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_roots
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.hierarchically_index_flat_scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      hierarchically_index_flat_scores
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.invert_childparent_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      invert_childparent_tree
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.preorder_apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      preorder_apply
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.set_indices" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_indices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.tree_walk" class="md-nav__link">
+    <span class="md-ellipsis">
+      tree_walk
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.trim_childparent_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      trim_childparent_tree
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchical_loss/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hierarchical loss
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hierarchy caching class
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      hierarchy_tensor_utils
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.accumulate_hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      accumulate_hierarchy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_index_tensor" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_hierarchy_index_tensor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_sibling_mask" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_hierarchy_sibling_mask
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.build_parent_tensor" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_parent_tensor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.expand_target_hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      expand_target_hierarchy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.find_closest_permitted_parent" class="md-nav__link">
+    <span class="md-ellipsis">
+      find_closest_permitted_parent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.get_ancestor_chain_lens" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_ancestor_chain_lens
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.get_roots" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_roots
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.hierarchically_index_flat_scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      hierarchically_index_flat_scores
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.invert_childparent_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      invert_childparent_tree
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.preorder_apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      preorder_apply
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.set_indices" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_indices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.tree_walk" class="md-nav__link">
+    <span class="md-ellipsis">
+      tree_walk
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical_loss.hierarchy_tensor_utils.trim_childparent_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      trim_childparent_tree
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="utilities-for-working-with-hierarchies-as-tensors">Utilities for working with hierarchies as tensors</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="hierarchical_loss.hierarchy_tensor_utils"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.accumulate_hierarchy" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">accumulate_hierarchy</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">,</span> <span class="n">reduce_op</span><span class="p">,</span> <span class="n">identity_value</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Performs a reduce operation along a hierarchical structure.</p>
+<p>This function applies a reduction operation (e.g., <code>torch.sum</code>,
+<code>torch.max</code>) along each ancestral path in a hierarchy. The implementation
+is fully vectorized. It first gathers the initial values for all
+nodes along each path, replaces padded values with the <code>identity_value</code>,
+and then applies the <code>reduce_op</code> along the path dimension.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>predictions</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tensor of shape <code>[B, D, N]</code>, where <code>B</code> is the batch size, <code>D</code> is the
+number of detections, and <code>N</code> is the number of classes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hierarchy_index</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An int tensor of shape <code>[N, M]</code> encoding the hierarchy, where <code>N</code> is the
+number of classes and <code>M</code> is the maximum hierarchy depth. Each row <code>i</code>
+contains the path from node <code>i</code> to its root. Parent node IDs are to
+the right of child node IDs. A value of -1 is used for padding.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>reduce_op</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="torch.Tensor">Tensor</span>, <span title="int">int</span>], <span title="torch.Tensor">Tensor</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A function that performs a reduction operation along a dimension,
+such as <code>torch.sum</code> or <code>torch.max</code>. It must accept a tensor
+and a <code>dim</code> argument, and return a tensor.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>identity_value</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> | <span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The identity value for the reduction operation. For example,
+<code>0.0</code> for <code>torch.sum</code> or <code>-torch.inf</code> for <code>torch.max</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new tensor with the same shape as <code>predictions</code> (but with the
+last dimension, M, reduced) containing the aggregated values
+along each path.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">hierarchy_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Predictions for 5 classes: [0., 10., 20., 30., 40.]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example 1: Hierarchical Sum</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 0: [0, 1, 2] -&gt; 0. + 10. + 20. = 30.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 1: [1, 2]   -&gt; 10. + 20. = 30.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 2: [2]      -&gt; 20. = 20.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 3: [3, 4]   -&gt; 30. + 40. = 70.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 4: [4]      -&gt; 40. = 40.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sum_preds</span> <span class="o">=</span> <span class="n">accumulate_hierarchy</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sum_preds</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+<span class="go">tensor([30., 30., 20., 70., 40.])</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example 2: Hierarchical Max</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 0: [0, 1, 2] -&gt; max(0., 10., 20.) = 20.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 1: [1, 2]   -&gt; max(10., 20.) = 20.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 2: [2]      -&gt; max(20.) = 20.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 3: [3, 4]   -&gt; max(30., 40.) = 40.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Path 4: [4]      -&gt; max(40.) = 40.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_op</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_preds</span> <span class="o">=</span> <span class="n">accumulate_hierarchy</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">,</span> <span class="n">max_op</span><span class="p">,</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">max_preds</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+<span class="go">tensor([20., 20., 20., 40., 40.])</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">accumulate_hierarchy</span><span class="p">(</span>
+    <span class="n">predictions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">hierarchy_index</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">reduce_op</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">identity_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs a reduce operation along a hierarchical structure.</span>
+
+<span class="sd">    This function applies a reduction operation (e.g., `torch.sum`,</span>
+<span class="sd">    `torch.max`) along each ancestral path in a hierarchy. The implementation</span>
+<span class="sd">    is fully vectorized. It first gathers the initial values for all</span>
+<span class="sd">    nodes along each path, replaces padded values with the `identity_value`,</span>
+<span class="sd">    and then applies the `reduce_op` along the path dimension.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    predictions : torch.Tensor</span>
+<span class="sd">        A tensor of shape `[B, D, N]`, where `B` is the batch size, `D` is the</span>
+<span class="sd">        number of detections, and `N` is the number of classes.</span>
+<span class="sd">    hierarchy_index : torch.Tensor</span>
+<span class="sd">        An int tensor of shape `[N, M]` encoding the hierarchy, where `N` is the</span>
+<span class="sd">        number of classes and `M` is the maximum hierarchy depth. Each row `i`</span>
+<span class="sd">        contains the path from node `i` to its root. Parent node IDs are to</span>
+<span class="sd">        the right of child node IDs. A value of -1 is used for padding.</span>
+<span class="sd">    reduce_op : Callable[[torch.Tensor, int], torch.Tensor]</span>
+<span class="sd">        A function that performs a reduction operation along a dimension,</span>
+<span class="sd">        such as `torch.sum` or `torch.max`. It must accept a tensor</span>
+<span class="sd">        and a `dim` argument, and return a tensor.</span>
+<span class="sd">    identity_value : float | int</span>
+<span class="sd">        The identity value for the reduction operation. For example,</span>
+<span class="sd">        `0.0` for `torch.sum` or `-torch.inf` for `torch.max`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A new tensor with the same shape as `predictions` (but with the</span>
+<span class="sd">        last dimension, M, reduced) containing the aggregated values</span>
+<span class="sd">        along each path.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; hierarchy_index = torch.tensor([</span>
+<span class="sd">    ...     [ 0,  1,  2],</span>
+<span class="sd">    ...     [ 1,  2, -1],</span>
+<span class="sd">    ...     [ 2, -1, -1],</span>
+<span class="sd">    ...     [ 3,  4, -1],</span>
+<span class="sd">    ...     [ 4, -1, -1]</span>
+<span class="sd">    ... ], dtype=torch.int64)</span>
+<span class="sd">    &gt;&gt;&gt; # Predictions for 5 classes: [0., 10., 20., 30., 40.]</span>
+<span class="sd">    &gt;&gt;&gt; predictions = torch.arange(0, 50, 10, dtype=torch.float32).view(1, 1, 5)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Example 1: Hierarchical Sum</span>
+<span class="sd">    &gt;&gt;&gt; # Path 0: [0, 1, 2] -&gt; 0. + 10. + 20. = 30.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 1: [1, 2]   -&gt; 10. + 20. = 30.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 2: [2]      -&gt; 20. = 20.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 3: [3, 4]   -&gt; 30. + 40. = 70.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 4: [4]      -&gt; 40. = 40.</span>
+<span class="sd">    &gt;&gt;&gt; sum_preds = accumulate_hierarchy(predictions, hierarchy_index, torch.sum, 0.0)</span>
+<span class="sd">    &gt;&gt;&gt; print(sum_preds.squeeze())</span>
+<span class="sd">    tensor([30., 30., 20., 70., 40.])</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Example 2: Hierarchical Max</span>
+<span class="sd">    &gt;&gt;&gt; # Path 0: [0, 1, 2] -&gt; max(0., 10., 20.) = 20.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 1: [1, 2]   -&gt; max(10., 20.) = 20.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 2: [2]      -&gt; max(20.) = 20.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 3: [3, 4]   -&gt; max(30., 40.) = 40.</span>
+<span class="sd">    &gt;&gt;&gt; # Path 4: [4]      -&gt; max(40.) = 40.</span>
+<span class="sd">    &gt;&gt;&gt; max_op = lambda x, dim: torch.max(x, dim=dim).values</span>
+<span class="sd">    &gt;&gt;&gt; max_preds = accumulate_hierarchy(predictions, hierarchy_index, max_op, -torch.inf)</span>
+<span class="sd">    &gt;&gt;&gt; print(max_preds.squeeze())</span>
+<span class="sd">    tensor([20., 20., 20., 40., 40.])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">B</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">hierarchy_index</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># 1. GATHER: Collect prediction values for each node in each path.</span>
+    <span class="c1"># Create a mask for valid indices (non -1)</span>
+    <span class="n">valid_mask</span> <span class="o">=</span> <span class="n">hierarchy_index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Create a &quot;safe&quot; index tensor to prevent out-of-bounds errors from -1.</span>
+    <span class="c1"># We replace -1 with a valid index (e.g., 0) and will zero out its</span>
+    <span class="c1"># contribution later using the mask.</span>
+    <span class="n">safe_index</span> <span class="o">=</span> <span class="n">hierarchy_index</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="o">~</span><span class="n">valid_mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Use advanced indexing to gather values. `predictions[:, :, safe_index]`</span>
+    <span class="c1"># creates a tensor of shape [B, D, N, M].</span>
+    <span class="n">path_values</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">safe_index</span><span class="p">]</span>
+
+    <span class="c1"># Replace the invalid, padded values with the appropriate identity value.</span>
+    <span class="c1"># The valid_mask broadcasts from [N, M] to [B, D, N, M].</span>
+    <span class="n">path_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="n">valid_mask</span><span class="p">,</span>
+        <span class="n">path_values</span><span class="p">,</span>
+        <span class="n">identity_value</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 2. ACCUMULATE: Apply the reduction operation along the path dimension.</span>
+    <span class="n">final_values</span> <span class="o">=</span> <span class="n">reduce_op</span><span class="p">(</span><span class="n">path_values</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_values</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_index_tensor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_hierarchy_index_tensor</span><span class="p">(</span><span class="n">hierarchy</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates a 2D tensor mapping each node to its full ancestor path.</p>
+<p>This function translates a {child: parent} dictionary hierarchy into a
+2D tensor. The hierarchy MUST BE DENSE, in the sense that the keys and values
+must run from 0 to C-1 where C is the number of nodes.
+Each row <code>i</code> of the tensor corresponds to node <code>i</code>. The
+row contains the full ancestor path starting with the node itself:
+<code>[node_id, parent_id, grandparent_id, ..., root_id]</code>.</p>
+<p>The paths are right-padded with -1 to the length of the longest
+ancestor path in the hierarchy.</p>
+<p>This tensor is used as an index for hierarchical accumulation operations.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>hierarchy</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format. Node IDs must be non-negative
+integers that can be used as tensor indices.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>device</code>
+            </td>
+            <td>
+                  <code><span title="torch.device">device</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The desired device for the output tensor. If <code>None</code>, uses the
+default PyTorch device. By default <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 2D tensor of shape <code>(C, M)</code>, where <code>M</code> is the maximum hierarchy
+depth and <code>C</code> is the number of categories (nodes in the tree).
+<code>tensor[i]</code> contains the ancestor path for node <code>i</code>, padded with -1.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">hierarchy</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Nodes found: {0, 1, 2, 3, 4} -&gt; len=5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Max depth: 3 (for node 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">build_hierarchy_index_tensor</span><span class="p">(</span><span class="n">hierarchy</span><span class="p">)</span>
+<span class="go">tensor([[ 0,  1,  2],</span>
+<span class="go">        [ 1,  2, -1],</span>
+<span class="go">        [ 2, -1, -1],</span>
+<span class="go">        [ 3,  4, -1],</span>
+<span class="go">        [ 4, -1, -1]], dtype=torch.int32)</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_hierarchy_index_tensor</span><span class="p">(</span>
+    <span class="n">hierarchy</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a 2D tensor mapping each node to its full ancestor path.</span>
+
+<span class="sd">    This function translates a {child: parent} dictionary hierarchy into a</span>
+<span class="sd">    2D tensor. The hierarchy MUST BE DENSE, in the sense that the keys and values</span>
+<span class="sd">    must run from 0 to C-1 where C is the number of nodes.</span>
+<span class="sd">    Each row `i` of the tensor corresponds to node `i`. The</span>
+<span class="sd">    row contains the full ancestor path starting with the node itself:</span>
+<span class="sd">    `[node_id, parent_id, grandparent_id, ..., root_id]`.</span>
+
+<span class="sd">    The paths are right-padded with -1 to the length of the longest</span>
+<span class="sd">    ancestor path in the hierarchy.</span>
+
+<span class="sd">    This tensor is used as an index for hierarchical accumulation operations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hierarchy : dict[int, int]</span>
+<span class="sd">        A tree in {child: parent} format. Node IDs must be non-negative</span>
+<span class="sd">        integers that can be used as tensor indices.</span>
+<span class="sd">    device : torch.device | str | None, optional</span>
+<span class="sd">        The desired device for the output tensor. If `None`, uses the</span>
+<span class="sd">        default PyTorch device. By default `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A 2D tensor of shape `(C, M)`, where `M` is the maximum hierarchy</span>
+<span class="sd">        depth and `C` is the number of categories (nodes in the tree).</span>
+<span class="sd">        `tensor[i]` contains the ancestor path for node `i`, padded with -1.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; hierarchy = {0: 1, 1: 2, 3: 4}</span>
+<span class="sd">    &gt;&gt;&gt; # Nodes found: {0, 1, 2, 3, 4} -&gt; len=5</span>
+<span class="sd">    &gt;&gt;&gt; # Max depth: 3 (for node 0)</span>
+<span class="sd">    &gt;&gt;&gt; build_hierarchy_index_tensor(hierarchy)</span>
+<span class="sd">    tensor([[ 0,  1,  2],</span>
+<span class="sd">            [ 1,  2, -1],</span>
+<span class="sd">            [ 2, -1, -1],</span>
+<span class="sd">            [ 3,  4, -1],</span>
+<span class="sd">            [ 4, -1, -1]], dtype=torch.int32)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lens</span> <span class="o">=</span> <span class="n">get_ancestor_chain_lens</span><span class="p">(</span><span class="n">hierarchy</span><span class="p">)</span>
+    <span class="n">index_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lens</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lens</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">preorder_apply</span><span class="p">(</span><span class="n">hierarchy</span><span class="p">,</span> <span class="n">set_indices</span><span class="p">,</span> <span class="n">index_tensor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index_tensor</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_sibling_mask" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_hierarchy_sibling_mask</span><span class="p">(</span><span class="n">parent_tensor</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates a boolean mask identifying sibling groups from a parent tensor.</p>
+<p>This function is used to prepare a mask for <code>utils.logsumexp_over_siblings</code>.
+It takes the 1D parent tensor (where <code>parent_tensor[i] = parent_id</code>)
+and creates a 2D mask.</p>
+<p>Each column <code>g</code> in the mask represents a unique sibling group (i.e., a
+unique parent, including -1 for the root group). A node <code>i</code> will have
+<code>True</code> in column <code>g</code> if its parent is the parent corresponding to
+sibling group <code>g</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>parent_tensor</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 1D tensor of shape <code>(C,)</code>, where <code>C</code> is the number of classes.
+<code>parent_tensor[i]</code> contains the integer ID of the parent of node <code>i</code>,
+or -1 for root nodes.  See the <code>build_parent_tensor</code> function.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>device</code>
+            </td>
+            <td>
+                  <code><span title="torch.device">device</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The desired device for the output tensor. If <code>None</code>, uses the
+default PyTorch device. By default <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 2D boolean tensor of shape <code>(C, G)</code>, where <code>G</code> is the number of
+unique parent groups (including roots). <code>mask[i, g]</code> is <code>True</code>
+if node <code>i</code> belongs to sibling group <code>g</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Node parents: 0-&gt;1, 1-&gt;2, 2-&gt;-1, 3-&gt;2, 4-&gt;-1, 5-&gt;6, 6-&gt;-1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parent_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Unique parents (groups): -1, 1, 2, 6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">build_hierarchy_sibling_mask</span><span class="p">(</span><span class="n">parent_tensor</span><span class="p">)</span>
+<span class="go">tensor([[False,  True, False, False],</span>
+<span class="go">        [False, False,  True, False],</span>
+<span class="go">        [ True, False, False, False],</span>
+<span class="go">        [False, False,  True, False],</span>
+<span class="go">        [ True, False, False, False],</span>
+<span class="go">        [False, False, False,  True],</span>
+<span class="go">        [ True, False, False, False]])</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_hierarchy_sibling_mask</span><span class="p">(</span>
+    <span class="n">parent_tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a boolean mask identifying sibling groups from a parent tensor.</span>
+
+<span class="sd">    This function is used to prepare a mask for `utils.logsumexp_over_siblings`.</span>
+<span class="sd">    It takes the 1D parent tensor (where `parent_tensor[i] = parent_id`)</span>
+<span class="sd">    and creates a 2D mask.</span>
+
+<span class="sd">    Each column `g` in the mask represents a unique sibling group (i.e., a</span>
+<span class="sd">    unique parent, including -1 for the root group). A node `i` will have</span>
+<span class="sd">    `True` in column `g` if its parent is the parent corresponding to</span>
+<span class="sd">    sibling group `g`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parent_tensor : torch.Tensor</span>
+<span class="sd">        A 1D tensor of shape `(C,)`, where `C` is the number of classes.</span>
+<span class="sd">        `parent_tensor[i]` contains the integer ID of the parent of node `i`,</span>
+<span class="sd">        or -1 for root nodes.  See the `build_parent_tensor` function.</span>
+<span class="sd">    device : torch.device | str | None, optional</span>
+<span class="sd">        The desired device for the output tensor. If `None`, uses the</span>
+<span class="sd">        default PyTorch device. By default `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A 2D boolean tensor of shape `(C, G)`, where `G` is the number of</span>
+<span class="sd">        unique parent groups (including roots). `mask[i, g]` is `True`</span>
+<span class="sd">        if node `i` belongs to sibling group `g`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Node parents: 0-&gt;1, 1-&gt;2, 2-&gt;-1, 3-&gt;2, 4-&gt;-1, 5-&gt;6, 6-&gt;-1</span>
+<span class="sd">    &gt;&gt;&gt; parent_tensor = torch.tensor([ 1,  2, -1,  2, -1,  6, -1])</span>
+<span class="sd">    &gt;&gt;&gt; # Unique parents (groups): -1, 1, 2, 6</span>
+<span class="sd">    &gt;&gt;&gt; build_hierarchy_sibling_mask(parent_tensor)</span>
+<span class="sd">    tensor([[False,  True, False, False],</span>
+<span class="sd">            [False, False,  True, False],</span>
+<span class="sd">            [ True, False, False, False],</span>
+<span class="sd">            [False, False,  True, False],</span>
+<span class="sd">            [ True, False, False, False],</span>
+<span class="sd">            [False, False, False,  True],</span>
+<span class="sd">            [ True, False, False, False]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">parent_tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Identify all unique parents (which uniquely define child groups), including -1 for roots</span>
+    <span class="n">unique_parents</span><span class="p">,</span> <span class="n">inverse_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">parent_tensor</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_parents</span><span class="p">)</span>
+
+    <span class="n">sibling_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="c1"># Assign each node to the column of its parent group</span>
+    <span class="n">sibling_mask</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">C</span><span class="p">),</span> <span class="n">inverse_indices</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">sibling_mask</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.build_parent_tensor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_parent_tensor</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Converts a {child: parent} dictionary tree into a 1D parent tensor.</p>
+<p>This function creates a 1D tensor where the value at each index <code>i</code>
+is the ID of that node's parent. Nodes that are not children (i.e.,
+roots) will have a value of -1.</p>
+<p>The size of the tensor is determined by the maximum node ID present
+in the tree (in either keys or values).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format. Node IDs are assumed to be
+non-negative integers.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>device</code>
+            </td>
+            <td>
+                  <code><span title="torch.device">device</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The desired device for the output tensor. If <code>None</code>, uses the
+default PyTorch device. By default <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 1D tensor of shape <code>(C,)</code>, where <code>C</code> is <code>max(all_node_ids) + 1</code>.
+<code>parent_tensor[i]</code> contains the ID of the parent of node <code>i</code>,
+or -1 if <code>i</code> is a root or not in the hierarchy.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Max node ID is 6, so tensor size is 7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">build_parent_tensor</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="go">tensor([ 1,  2, -1,  2, -1,  6, -1])</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_parent_tensor</span><span class="p">(</span>
+    <span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a {child: parent} dictionary tree into a 1D parent tensor.</span>
+
+<span class="sd">    This function creates a 1D tensor where the value at each index `i`</span>
+<span class="sd">    is the ID of that node&#39;s parent. Nodes that are not children (i.e.,</span>
+<span class="sd">    roots) will have a value of -1.</span>
+
+<span class="sd">    The size of the tensor is determined by the maximum node ID present</span>
+<span class="sd">    in the tree (in either keys or values).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[int, int]</span>
+<span class="sd">        A tree in {child: parent} format. Node IDs are assumed to be</span>
+<span class="sd">        non-negative integers.</span>
+<span class="sd">    device : torch.device | str | None, optional</span>
+<span class="sd">        The desired device for the output tensor. If `None`, uses the</span>
+<span class="sd">        default PyTorch device. By default `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A 1D tensor of shape `(C,)`, where `C` is `max(all_node_ids) + 1`.</span>
+<span class="sd">        `parent_tensor[i]` contains the ID of the parent of node `i`,</span>
+<span class="sd">        or -1 if `i` is a root or not in the hierarchy.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 3: 2, 5: 6}</span>
+<span class="sd">    &gt;&gt;&gt; # Max node ID is 6, so tensor size is 7</span>
+<span class="sd">    &gt;&gt;&gt; build_parent_tensor(tree)</span>
+<span class="sd">    tensor([ 1,  2, -1,  2, -1,  6, -1])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">parent_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">C</span><span class="p">,),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">parent_tensor</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="k">return</span> <span class="n">parent_tensor</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.expand_target_hierarchy" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">expand_target_hierarchy</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Expands a one-hot target tensor up the hierarchy.</p>
+<p>This function takes a target tensor that is "one-hot" along the class
+dimension (i.e., contains a single non-zero value) and propagates that
+value to all ancestors of the target class. The implementation is fully
+vectorized.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>target</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tensor of shape <code>[B, D, N]</code>, where <code>B</code> is the batch size, <code>D</code> is the
+number of detections, and <code>N</code> is the number of classes. It is assumed
+to be one-hot along the last dimension.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hierarchy_index</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An int tensor of shape <code>[N, M]</code> encoding the hierarchy, where <code>N</code> is the
+number of classes and <code>M</code> is the maximum hierarchy depth. Each row <code>i</code>
+contains the path from node <code>i</code> to its root.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new tensor with the same shape as <code>target</code> where the target value has
+been propagated up the hierarchy.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hierarchy_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Target is one-hot at index 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expanded_target</span> <span class="o">=</span> <span class="n">expand_target_hierarchy</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">expanded_target</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+<span class="go">tensor([0.4000, 0.4000, 0.4000, 0.0000, 0.0000])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expanded_target</span> <span class="o">=</span> <span class="n">expand_target_hierarchy</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">expanded_target</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+<span class="go">tensor([0.0000, 0.0000, 0.0000, 0.3000, 0.3000])</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">expand_target_hierarchy</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">hierarchy_index</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expands a one-hot target tensor up the hierarchy.</span>
+
+<span class="sd">    This function takes a target tensor that is &quot;one-hot&quot; along the class</span>
+<span class="sd">    dimension (i.e., contains a single non-zero value) and propagates that</span>
+<span class="sd">    value to all ancestors of the target class. The implementation is fully</span>
+<span class="sd">    vectorized.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    target : torch.Tensor</span>
+<span class="sd">        A tensor of shape `[B, D, N]`, where `B` is the batch size, `D` is the</span>
+<span class="sd">        number of detections, and `N` is the number of classes. It is assumed</span>
+<span class="sd">        to be one-hot along the last dimension.</span>
+<span class="sd">    hierarchy_index : torch.Tensor</span>
+<span class="sd">        An int tensor of shape `[N, M]` encoding the hierarchy, where `N` is the</span>
+<span class="sd">        number of classes and `M` is the maximum hierarchy depth. Each row `i`</span>
+<span class="sd">        contains the path from node `i` to its root.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A new tensor with the same shape as `target` where the target value has</span>
+<span class="sd">        been propagated up the hierarchy.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import torch</span>
+<span class="sd">    &gt;&gt;&gt; hierarchy_index = torch.tensor([</span>
+<span class="sd">    ...     [ 0,  1,  2],</span>
+<span class="sd">    ...     [ 1,  2, -1],</span>
+<span class="sd">    ...     [ 2, -1, -1],</span>
+<span class="sd">    ...     [ 3,  4, -1],</span>
+<span class="sd">    ...     [ 4, -1, -1]</span>
+<span class="sd">    ... ], dtype=torch.int64)</span>
+<span class="sd">    &gt;&gt;&gt; # Target is one-hot at index 0</span>
+<span class="sd">    &gt;&gt;&gt; target = torch.tensor([0.4, 0., 0., 0., 0.]).view(1, 1, 5)</span>
+<span class="sd">    &gt;&gt;&gt; expanded_target = expand_target_hierarchy(target, hierarchy_index)</span>
+<span class="sd">    &gt;&gt;&gt; print(expanded_target.squeeze())</span>
+<span class="sd">    tensor([0.4000, 0.4000, 0.4000, 0.0000, 0.0000])</span>
+<span class="sd">    &gt;&gt;&gt; target = torch.tensor([0., 0., 0., 0.3, 0.]).view(1, 1, 5)</span>
+<span class="sd">    &gt;&gt;&gt; expanded_target = expand_target_hierarchy(target, hierarchy_index)</span>
+<span class="sd">    &gt;&gt;&gt; print(expanded_target.squeeze())</span>
+<span class="sd">    tensor([0.0000, 0.0000, 0.0000, 0.3000, 0.3000])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">hierarchy_index</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Find the single non-zero value and its index in the target tensor.</span>
+    <span class="n">hot_value</span><span class="p">,</span> <span class="n">hot_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Gather the ancestral paths corresponding to the hot indices.</span>
+    <span class="c1"># The shape will be [B, D, M].</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">hierarchy_index</span><span class="p">[</span><span class="n">hot_index</span><span class="p">]</span>
+
+    <span class="c1"># Create a mask for valid indices (non -1) to handle padded paths.</span>
+    <span class="n">valid_mask</span> <span class="o">=</span> <span class="n">paths</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Create a &quot;safe&quot; index tensor to prevent out-of-bounds errors from -1.</span>
+    <span class="c1"># We replace -1 with a valid index (e.g., 0) and will zero out its</span>
+    <span class="c1"># contribution later using a masked source.</span>
+    <span class="n">safe_paths</span> <span class="o">=</span> <span class="n">paths</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="o">~</span><span class="n">valid_mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">safe_paths_ints</span> <span class="o">=</span> <span class="n">safe_paths</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+    <span class="c1"># Prepare the source tensor for the scatter operation.</span>
+    <span class="c1"># It should have the same value (`hot_value`) for all valid path members.</span>
+    <span class="n">src_values</span> <span class="o">=</span> <span class="n">hot_value</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+    <span class="n">masked_src</span> <span class="o">=</span> <span class="n">src_values</span> <span class="o">*</span> <span class="n">valid_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">src_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># Create an output tensor and scatter the hot value into all ancestral positions.</span>
+    <span class="n">expanded_target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">expanded_target</span><span class="o">.</span><span class="n">scatter_</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">safe_paths_ints</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="n">masked_src</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">expanded_target</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.find_closest_permitted_parent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">permitted_nodes</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Finds the first ancestor of a node that is in a permitted set.</p>
+<p>This function walks up the ancestral chain of a node (using the
+{child: parent} tree) and returns the first ancestor it finds
+that is present in the <code>permitted_nodes</code> set.</p>
+<p>If no ancestor (including the node itself) is in the set,
+or if the node is not in the tree to begin with, it returns None.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>node</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Hashable">Hashable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the node to start searching from.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>permitted_nodes</code>
+            </td>
+            <td>
+                  <code><span title="set">set</span>[<span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A set of node IDs that are considered "permitted".</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="collections.abc.Hashable">Hashable</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the closest permitted ancestor, or None if none is found.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">permitted</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">permitted</span><span class="p">)</span> <span class="c1"># 1 -&gt; 2 (permitted)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">permitted</span><span class="p">)</span> <span class="c1"># 0 is not in tree keys, returns None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Add 0 to the tree</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">permitted</span><span class="p">)</span> <span class="c1"># 0 -&gt; 1 -&gt; 2 (permitted)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">10</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">:</span> <span class="mi">40</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="p">{</span><span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">})</span> <span class="c1"># No permitted ancestors, returns None</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_closest_permitted_parent</span><span class="p">(</span>
+    <span class="n">node</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">,</span>
+    <span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">],</span>
+    <span class="n">permitted_nodes</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Hashable</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the first ancestor of a node that is in a permitted set.</span>
+
+<span class="sd">    This function walks up the ancestral chain of a node (using the</span>
+<span class="sd">    {child: parent} tree) and returns the first ancestor it finds</span>
+<span class="sd">    that is present in the `permitted_nodes` set.</span>
+
+<span class="sd">    If no ancestor (including the node itself) is in the set,</span>
+<span class="sd">    or if the node is not in the tree to begin with, it returns None.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    node : Hashable</span>
+<span class="sd">        The ID of the node to start searching from.</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        A tree in {child: parent} format.</span>
+<span class="sd">    permitted_nodes : set[Hashable]</span>
+<span class="sd">        A set of node IDs that are considered &quot;permitted&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Hashable | None</span>
+<span class="sd">        The ID of the closest permitted ancestor, or None if none is found.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {1: 2, 2: 3, 3: 4, 4: 5}</span>
+<span class="sd">    &gt;&gt;&gt; permitted = {0, 2, 5}</span>
+<span class="sd">    &gt;&gt;&gt; find_closest_permitted_parent(1, tree, permitted) # 1 -&gt; 2 (permitted)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; find_closest_permitted_parent(0, tree, permitted) # 0 is not in tree keys, returns None</span>
+<span class="sd">    &gt;&gt;&gt; tree[0] = 1 # Add 0 to the tree</span>
+<span class="sd">    &gt;&gt;&gt; find_closest_permitted_parent(0, tree, permitted) # 0 -&gt; 1 -&gt; 2 (permitted)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; tree = {10: 20, 20: 30, 30: 40}</span>
+<span class="sd">    &gt;&gt;&gt; find_closest_permitted_parent(10, tree, {50, 60}) # No permitted ancestors, returns None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">permitted_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">parent</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.get_ancestor_chain_lens" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_ancestor_chain_lens</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get lengths of ancestor chains in a { child: parent } dictionary tree</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">get_ancestor_chain_lens</span><span class="p">({</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span><span class="mi">8</span> <span class="p">})</span>
+<span class="go">{3: 1, 2: 2, 1: 3, 0: 4, 6: 1, 5: 2, 4: 3, 8: 1, 7: 2}</span>
+</code></pre></div>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in { child: parent } format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>lengths</code></td>            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The lengths of the path to the root from each node { node: length }</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ancestor_chain_lens</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get lengths of ancestor chains in a { child: parent } dictionary tree</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; get_ancestor_chain_lens({ 0:1, 1:2, 2:3, 4:5, 5:6, 7:8 })</span>
+<span class="sd">    {3: 1, 2: 2, 1: 3, 0: 4, 6: 1, 5: 2, 4: 3, 8: 1, 7: 2}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree: dict[Hashable, Hashable]</span>
+<span class="sd">        A tree in { child: parent } format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lengths: dict[Hashable, int]</span>
+<span class="sd">        The lengths of the path to the root from each node { node: length }</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">preorder_apply</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">_increment_chain_len</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.get_roots" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_roots</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Finds all root nodes in a {child: parent} tree.</p>
+<p>A root node is defined as any node that is not a child of another
+node in the tree (i.e., its ancestor chain length is 1).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of all root nodes.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_roots</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="c1"># Roots are 2 and 6</span>
+<span class="go">[2, 6]</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_roots</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds all root nodes in a {child: parent} tree.</span>
+
+<span class="sd">    A root node is defined as any node that is not a child of another</span>
+<span class="sd">    node in the tree (i.e., its ancestor chain length is 1).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        A tree in {child: parent} format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[Hashable]</span>
+<span class="sd">        A list of all root nodes.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 3: 2, 5: 6}</span>
+<span class="sd">    &gt;&gt;&gt; get_roots(tree) # Roots are 2 and 6</span>
+<span class="sd">    [2, 6]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ancestor_chain_lens</span> <span class="o">=</span> <span class="n">get_ancestor_chain_lens</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ancestor_chain_lens</span> <span class="k">if</span> <span class="n">ancestor_chain_lens</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.hierarchically_index_flat_scores" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">hierarchically_index_flat_scores</span><span class="p">(</span><span class="n">flat_scores</span><span class="p">,</span> <span class="n">target_indices</span><span class="p">,</span> <span class="n">hierarchy_index_tensor</span><span class="p">,</span> <span class="n">hierarchy_mask</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Gathers scores from a flat score tensor along specified hierarchical paths.</p>
+<p>This function takes a batch of flat scores (<code>B, P, C</code>) and a batch of
+target category indices (<code>B, P</code>). For each target index, it looks up
+the full ancestral path in <code>hierarchy_index_tensor</code> (<code>C, H</code>) and
+gathers the corresponding scores from <code>flat_scores</code>.</p>
+<p>It then applies the <code>hierarchy_mask</code> to the gathered scores, zeroing
+out entries where the mask is <code>True</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>flat_scores</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tensor of flat scores with shape <code>(B, P, C)</code>, where <code>B</code> is
+batch size, <code>P</code> is number of proposals, and <code>C</code> is number
+of categories.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_indices</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A long tensor of shape <code>(B, P)</code> containing the leaf category
+index for each proposal.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hierarchy_index_tensor</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A long tensor of shape <code>(C, H)</code> mapping each category <code>c</code> to its
+ancestral path. <code>H</code> is the max hierarchy depth.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hierarchy_mask</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A boolean <strong>invalidity</strong> mask of shape <code>(C, H)</code>. <code>True</code> indicates
+an invalid entry (e.g., padding) that should be zeroed out.
+This mask is indexed by <code>target_indices</code> and applied to the
+gathered scores.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>device</code>
+            </td>
+            <td>
+                  <code><span title="torch.device">device</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The desired device for <code>torch.arange</code>. If <code>None</code>, uses the
+default PyTorch device. By default <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tensor of shape <code>(B, P, H)</code> containing the gathered scores
+along each target's ancestral path, after masking.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># B=1, P=1, C=2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flat_scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">20.</span><span class="p">]]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Target index is 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># C=2, H=3. Path 0 is [0, 1, -1]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hierarchy_index_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an invalidity mask (True where path is -1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invalidity_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">hierarchy_index_tensor</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">invalidity_mask</span><span class="p">)</span>
+<span class="go">tensor([[False, False,  True],</span>
+<span class="go">        [False,  True,  True]])</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The function will gather scores for path [0, 1, -1] -&gt; [10., 20., 10.]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># (Note: -1 safely indexes 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># It will apply the mask for index 0: [False, False, True]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Result: [10., 20., 0.]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hierarchically_index_flat_scores</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">flat_scores</span><span class="p">,</span> <span class="n">target_indices</span><span class="p">,</span> <span class="n">hierarchy_index_tensor</span><span class="p">,</span> <span class="n">invalidity_mask</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">tensor([[[10., 20.,  0.]]])</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hierarchically_index_flat_scores</span><span class="p">(</span>
+    <span class="n">flat_scores</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">target_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">hierarchy_index_tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">hierarchy_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gathers scores from a flat score tensor along specified hierarchical paths.</span>
+
+<span class="sd">    This function takes a batch of flat scores (`B, P, C`) and a batch of</span>
+<span class="sd">    target category indices (`B, P`). For each target index, it looks up</span>
+<span class="sd">    the full ancestral path in `hierarchy_index_tensor` (`C, H`) and</span>
+<span class="sd">    gathers the corresponding scores from `flat_scores`.</span>
+
+<span class="sd">    It then applies the `hierarchy_mask` to the gathered scores, zeroing</span>
+<span class="sd">    out entries where the mask is `True`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    flat_scores : torch.Tensor</span>
+<span class="sd">        A tensor of flat scores with shape `(B, P, C)`, where `B` is</span>
+<span class="sd">        batch size, `P` is number of proposals, and `C` is number</span>
+<span class="sd">        of categories.</span>
+<span class="sd">    target_indices : torch.Tensor</span>
+<span class="sd">        A long tensor of shape `(B, P)` containing the leaf category</span>
+<span class="sd">        index for each proposal.</span>
+<span class="sd">    hierarchy_index_tensor : torch.Tensor</span>
+<span class="sd">        A long tensor of shape `(C, H)` mapping each category `c` to its</span>
+<span class="sd">        ancestral path. `H` is the max hierarchy depth.</span>
+<span class="sd">    hierarchy_mask : torch.Tensor</span>
+<span class="sd">        A boolean **invalidity** mask of shape `(C, H)`. `True` indicates</span>
+<span class="sd">        an invalid entry (e.g., padding) that should be zeroed out.</span>
+<span class="sd">        This mask is indexed by `target_indices` and applied to the</span>
+<span class="sd">        gathered scores.</span>
+<span class="sd">    device : torch.device | str | None, optional</span>
+<span class="sd">        The desired device for `torch.arange`. If `None`, uses the</span>
+<span class="sd">        default PyTorch device. By default `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    torch.Tensor</span>
+<span class="sd">        A tensor of shape `(B, P, H)` containing the gathered scores</span>
+<span class="sd">        along each target&#39;s ancestral path, after masking.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import torch</span>
+<span class="sd">    &gt;&gt;&gt; # B=1, P=1, C=2</span>
+<span class="sd">    &gt;&gt;&gt; flat_scores = torch.tensor([[[10., 20.]]])</span>
+<span class="sd">    &gt;&gt;&gt; # Target index is 0</span>
+<span class="sd">    &gt;&gt;&gt; target_indices = torch.tensor([[0]])</span>
+<span class="sd">    &gt;&gt;&gt; # C=2, H=3. Path 0 is [0, 1, -1]</span>
+<span class="sd">    &gt;&gt;&gt; hierarchy_index_tensor = torch.tensor([[0, 1, -1], [1, -1, -1]], dtype=torch.long)</span>
+<span class="sd">    &gt;&gt;&gt; # Create an invalidity mask (True where path is -1)</span>
+<span class="sd">    &gt;&gt;&gt; invalidity_mask = (hierarchy_index_tensor == -1)</span>
+<span class="sd">    &gt;&gt;&gt; print(invalidity_mask)</span>
+<span class="sd">    tensor([[False, False,  True],</span>
+<span class="sd">            [False,  True,  True]])</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # The function will gather scores for path [0, 1, -1] -&gt; [10., 20., 10.]</span>
+<span class="sd">    &gt;&gt;&gt; # (Note: -1 safely indexes 0)</span>
+<span class="sd">    &gt;&gt;&gt; # It will apply the mask for index 0: [False, False, True]</span>
+<span class="sd">    &gt;&gt;&gt; # Result: [10., 20., 0.]</span>
+<span class="sd">    &gt;&gt;&gt; hierarchically_index_flat_scores(</span>
+<span class="sd">    ...     flat_scores, target_indices, hierarchy_index_tensor, invalidity_mask</span>
+<span class="sd">    ... )</span>
+<span class="sd">    tensor([[[10., 20.,  0.]]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_proposals</span><span class="p">,</span> <span class="n">n_categories</span> <span class="o">=</span> <span class="n">flat_scores</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">hierarchy_size</span> <span class="o">=</span> <span class="n">hierarchy_index_tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">hierarchy_indices</span> <span class="o">=</span> <span class="n">hierarchy_index_tensor</span><span class="p">[</span><span class="n">target_indices</span><span class="p">]</span>
+    <span class="n">flat_mask</span> <span class="o">=</span> <span class="n">hierarchy_mask</span><span class="p">[</span><span class="n">target_indices</span><span class="p">]</span>
+
+    <span class="c1"># Construct batch indices</span>
+    <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_proposals</span><span class="p">,</span> <span class="n">hierarchy_size</span><span class="p">)</span> <span class="c1"># (B, N, H)</span>
+    <span class="n">proposal_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_proposals</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_proposals</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_proposals</span><span class="p">,</span> <span class="n">hierarchy_size</span><span class="p">)</span> <span class="c1"># (B, N, H)</span>
+
+    <span class="n">gathered_scores</span> <span class="o">=</span> <span class="n">flat_scores</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,</span> <span class="n">proposal_indices</span><span class="p">,</span> <span class="n">hierarchy_indices</span><span class="p">]</span>  <span class="c1"># (B, N, H)</span>
+
+    <span class="c1"># Mask out invalid entries</span>
+    <span class="n">masked_scores</span> <span class="o">=</span> <span class="n">gathered_scores</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">flat_mask</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">masked_scores</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.invert_childparent_tree" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">invert_childparent_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Converts a {child: parent} tree into a nested {parent: {child: ...}} tree.</p>
+<p>This function inverts the standard {child: parent} structure, creating
+a nested dictionary that starts from the root(s). It uses
+<code>preorder_apply</code> to traverse the tree top-down and build the
+nested structure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A nested dictionary representing the tree in a top-down format,
+e.g., <code>{root: {child: {grandchild: {}}}}</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span> <span class="c1"># 0-&gt;1-&gt;2, 3-&gt;2, 5-&gt;6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invert_childparent_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="go">{2: {1: {0: {}}, 3: {}}, 6: {5: {}}}</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">invert_childparent_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a {child: parent} tree into a nested {parent: {child: ...}} tree.</span>
+
+<span class="sd">    This function inverts the standard {child: parent} structure, creating</span>
+<span class="sd">    a nested dictionary that starts from the root(s). It uses</span>
+<span class="sd">    `preorder_apply` to traverse the tree top-down and build the</span>
+<span class="sd">    nested structure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        A tree in {child: parent} format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        A nested dictionary representing the tree in a top-down format,</span>
+<span class="sd">        e.g., `{root: {child: {grandchild: {}}}}`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 3: 2, 5: 6} # 0-&gt;1-&gt;2, 3-&gt;2, 5-&gt;6</span>
+<span class="sd">    &gt;&gt;&gt; invert_childparent_tree(tree)</span>
+<span class="sd">    {2: {1: {0: {}}, 3: {}}, 6: {5: {}}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parentchild_tree</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">preorder_apply</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">_append_to_parentchild_tree</span><span class="p">,</span> <span class="n">parentchild_tree</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parentchild_tree</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.preorder_apply" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">preorder_apply</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Applies a function to all nodes in a tree in a pre-order (top-down) fashion.</p>
+<p>This function works by first finding an ancestor path (from leaf to root).
+It then applies the function <code>f</code> to the root (or highest unvisited node)
+and iterates <em>down</em> the path, applying <code>f</code> to each child and passing in
+the result from its parent. This top-down application is a pre-order
+traversal.</p>
+<p>It uses memoization (the <code>visited</code> dict) to ensure that <code>f</code> is
+applied to each node only once, even in multi-branch trees.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hierarchy tree, in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>f</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The function to apply to each node. Its signature must be
+<code>f(node: Hashable, parent_result: Any, *args: Any) -&gt; Any</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>*args</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional positional arguments to be passed to every call of <code>f</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>()</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary mapping each node ID to the result of <code>f(node, ...)</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example: Calculate node depth (pre-order calculation)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span> <span class="c1"># 0-&gt;1-&gt;2, 3-&gt;2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">parent_depth</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># parent_depth is the result from the parent node</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">parent_depth</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parent_depth</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preorder_apply</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="go">{2: 1, 1: 2, 0: 3, 3: 2}</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">preorder_apply</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">],</span> <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies a function to all nodes in a tree in a pre-order (top-down) fashion.</span>
+
+<span class="sd">    This function works by first finding an ancestor path (from leaf to root).</span>
+<span class="sd">    It then applies the function `f` to the root (or highest unvisited node)</span>
+<span class="sd">    and iterates *down* the path, applying `f` to each child and passing in</span>
+<span class="sd">    the result from its parent. This top-down application is a pre-order</span>
+<span class="sd">    traversal.</span>
+
+<span class="sd">    It uses memoization (the `visited` dict) to ensure that `f` is</span>
+<span class="sd">    applied to each node only once, even in multi-branch trees.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        The hierarchy tree, in {child: parent} format.</span>
+<span class="sd">    f : Callable</span>
+<span class="sd">        The function to apply to each node. Its signature must be</span>
+<span class="sd">        `f(node: Hashable, parent_result: Any, *args: Any) -&gt; Any`.</span>
+<span class="sd">    *args: Any</span>
+<span class="sd">        Additional positional arguments to be passed to every call of `f`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict[Hashable, Any]</span>
+<span class="sd">        A dictionary mapping each node ID to the result of `f(node, ...)`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Example: Calculate node depth (pre-order calculation)</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 3: 2} # 0-&gt;1-&gt;2, 3-&gt;2</span>
+<span class="sd">    &gt;&gt;&gt; def f(node, parent_depth):</span>
+<span class="sd">    ...     # parent_depth is the result from the parent node</span>
+<span class="sd">    ...     return 1 if parent_depth is None else parent_depth + 1</span>
+<span class="sd">    ...</span>
+<span class="sd">    &gt;&gt;&gt; preorder_apply(tree, f)</span>
+<span class="sd">    {2: 1, 1: 2, 0: 3, 3: 2}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">visited</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="n">visited</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">visited</span><span class="p">[</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">visited</span><span class="p">[</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">visited</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.set_indices" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_indices</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">parent_index</span><span class="p">,</span> <span class="n">tensor</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A helper function for <code>preorder_apply</code> to build an ancestor path tensor.</p>
+<p>This function populates a single row of the <code>tensor</code> (the row specified
+by <code>index</code>). It sets the first element of the row to <code>index</code> itself.
+If a <code>parent_index</code> is provided, it copies the parent's ancestor path
+(its row, excluding the last element) into the current node's row
+(starting from the second element).</p>
+<p>This creates the desired row format: [node_id, parent_id, grand_parent_id, ...].</p>
+<p>It is designed to be used with <code>tree_utils.preorder_apply</code>, where:
+- <code>index</code> is the <code>node</code>
+- <code>parent_index</code> is the <code>parent_result</code> (the return value from the
+  parent's call, which is the parent's index)
+- <code>tensor</code> is the <code>*args</code></p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The node ID, which corresponds to the row index in the tensor.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parent_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the parent node, or None if the node is a root.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tensor</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The 2D tensor being populated with ancestor paths.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>index</code> of the current node, to be passed as the
+<code>parent_index</code> to its children during the pre-order traversal.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/hierarchy_tensor_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_indices</span><span class="p">(</span><span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">parent_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A helper function for `preorder_apply` to build an ancestor path tensor.</span>
+
+<span class="sd">    This function populates a single row of the `tensor` (the row specified</span>
+<span class="sd">    by `index`). It sets the first element of the row to `index` itself.</span>
+<span class="sd">    If a `parent_index` is provided, it copies the parent&#39;s ancestor path</span>
+<span class="sd">    (its row, excluding the last element) into the current node&#39;s row</span>
+<span class="sd">    (starting from the second element).</span>
+
+<span class="sd">    This creates the desired row format: [node_id, parent_id, grand_parent_id, ...].</span>
+
+<span class="sd">    It is designed to be used with `tree_utils.preorder_apply`, where:</span>
+<span class="sd">    - `index` is the `node`</span>
+<span class="sd">    - `parent_index` is the `parent_result` (the return value from the</span>
+<span class="sd">      parent&#39;s call, which is the parent&#39;s index)</span>
+<span class="sd">    - `tensor` is the `*args`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int</span>
+<span class="sd">        The node ID, which corresponds to the row index in the tensor.</span>
+<span class="sd">    parent_index : int or None</span>
+<span class="sd">        The ID of the parent node, or None if the node is a root.</span>
+<span class="sd">    tensor : torch.Tensor</span>
+<span class="sd">        The 2D tensor being populated with ancestor paths.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        The `index` of the current node, to be passed as the</span>
+<span class="sd">        `parent_index` to its children during the pre-order traversal.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tensor</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+    <span class="k">if</span> <span class="n">parent_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tensor</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">parent_index</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">index</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.tree_walk" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">tree_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Walks up the ancestor chain from a starting node.</p>
+<p>This generator yields the starting node first, then its parent,
+its grandparent, and so on, until a root (a node not
+present as a key in the tree) is reached.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hierarchy tree, in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>node</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Hashable">Hashable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The node to start the walk from.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Yields:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="collections.abc.Iterator">Iterator</span>[<span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An iterator of node IDs in the ancestor chain, starting
+with the given node.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">tree_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="go">[0, 1, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">tree_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="go">[3, 4, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">tree_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">[2]</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tree_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">],</span> <span class="n">node</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Walks up the ancestor chain from a starting node.</span>
+
+<span class="sd">    This generator yields the starting node first, then its parent,</span>
+<span class="sd">    its grandparent, and so on, until a root (a node not</span>
+<span class="sd">    present as a key in the tree) is reached.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        The hierarchy tree, in {child: parent} format.</span>
+<span class="sd">    node : Hashable</span>
+<span class="sd">        The node to start the walk from.</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    Iterator[Hashable]</span>
+<span class="sd">        An iterator of node IDs in the ancestor chain, starting</span>
+<span class="sd">        with the given node.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 3: 4, 4: 2}</span>
+<span class="sd">    &gt;&gt;&gt; list(tree_walk(tree, 0))</span>
+<span class="sd">    [0, 1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; list(tree_walk(tree, 3))</span>
+<span class="sd">    [3, 4, 2]</span>
+<span class="sd">    &gt;&gt;&gt; list(tree_walk(tree, 2))</span>
+<span class="sd">    [2]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield</span> <span class="n">node</span>
+    <span class="k">while</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="k">yield</span> <span class="n">node</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hierarchical_loss.hierarchy_tensor_utils.trim_childparent_tree" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trim_childparent_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">permitted_nodes</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Trims a {child: parent} tree to only include permitted nodes.</p>
+<p>This function first remaps every node in the tree to its closest
+permitted ancestor. It then filters this map, keeping only the
+entries where the node (the key) is <em>also</em> in the <code>permitted_nodes</code>
+set.</p>
+<p>The result is a new {child: parent} tree containing <em>only</em>
+permitted nodes, mapped to their closest permitted ancestor
+(which will be another permitted node or None).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>tree</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tree in {child: parent} format.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>permitted_nodes</code>
+            </td>
+            <td>
+                  <code><span title="set">set</span>[<span title="collections.abc.Hashable">Hashable</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A set of node IDs to keep.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span>[<span title="collections.abc.Hashable">Hashable</span>, <span title="collections.abc.Hashable">Hashable</span> | None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new {child: parent} tree containing only permitted nodes,
+each re-mapped to its closest permitted ancestor.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span> <span class="c1"># 0-&gt;1-&gt;2-&gt;3-&gt;4-&gt;5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">permitted</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">}</span> <span class="c1"># 0, 2, and 5 are permitted</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trim_childparent_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">permitted</span><span class="p">)</span>
+<span class="go">{0: 2, 2: 5}</span>
+</code></pre></div>
+
+
+            <details class="quote">
+              <summary>Source code in <code>hierarchical_loss/tree_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">trim_childparent_tree</span><span class="p">(</span>
+    <span class="n">tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">],</span> <span class="n">permitted_nodes</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Hashable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Hashable</span><span class="p">,</span> <span class="n">Hashable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trims a {child: parent} tree to only include permitted nodes.</span>
+
+<span class="sd">    This function first remaps every node in the tree to its closest</span>
+<span class="sd">    permitted ancestor. It then filters this map, keeping only the</span>
+<span class="sd">    entries where the node (the key) is *also* in the `permitted_nodes`</span>
+<span class="sd">    set.</span>
+
+<span class="sd">    The result is a new {child: parent} tree containing *only*</span>
+<span class="sd">    permitted nodes, mapped to their closest permitted ancestor</span>
+<span class="sd">    (which will be another permitted node or None).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree : dict[Hashable, Hashable]</span>
+<span class="sd">        A tree in {child: parent} format.</span>
+<span class="sd">    permitted_nodes : set[Hashable]</span>
+<span class="sd">        A set of node IDs to keep.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict[Hashable, Hashable | None]</span>
+<span class="sd">        A new {child: parent} tree containing only permitted nodes,</span>
+<span class="sd">        each re-mapped to its closest permitted ancestor.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; tree = {0: 1, 1: 2, 2: 3, 3: 4, 4: 5} # 0-&gt;1-&gt;2-&gt;3-&gt;4-&gt;5</span>
+<span class="sd">    &gt;&gt;&gt; permitted = {0, 2, 5} # 0, 2, and 5 are permitted</span>
+<span class="sd">    &gt;&gt;&gt; trim_childparent_tree(tree, permitted)</span>
+<span class="sd">    {0: 2, 2: 5}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_tree</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="n">closest_permitted_parent</span> <span class="o">=</span> <span class="n">find_closest_permitted_parent</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">permitted_nodes</span><span class="p">)</span>
+        <span class="n">new_tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">closest_permitted_parent</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_tree</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">new_tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">permitted_nodes</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">new_tree</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">new_tree</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
