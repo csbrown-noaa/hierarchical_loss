@@ -673,11 +673,17 @@
   These predictions are then interpreted as <em>conditional</em> logit confidences.
   This allows us to use the existing model architecture as-is, and interpret the output as hierarchical only changing how we interpret the predictions.</p>
 <p>More specifically, suppose that we have $n$ categories, and a hierarchical structure over these categories.  Suppose that our model predicts a vector $V$ for some object or image.  We interpret the logit value in index i to be:</p>
-<p>$$ V[i] := logit(P(\text{category}[i] | \text{parent}(\text{category}[i]))) $$</p>
+<p>$$ 
+V[i] := logit(P(\text{category}[i] | \text{parent}(\text{category}[i]))) 
+$$</p>
 <p>We can compute the raw conditional probability using a sigmoid function.</p>
-<p>$$ sigmoid(V[i]) := P(\text{category}[i] | \text{parent}(\text{category}[i])) $$</p>
+<p>$$ 
+sigmoid(V[i]) := P(\text{category}[i] | \text{parent}(\text{category}[i])) 
+$$</p>
 <p>We can use these to compute marginal confidences at arbitrary locations in the hierarchy:</p>
-<p>$$ P(\text{category}[i]) = P(\text{category}[i] | \text{parent}(\text{category}[i])) * P(\text{parent}(\text{category}[i]) | \text{parent}(\text{parent}(\text{category}[i]))) \ldots $$</p>
+<p>$$ 
+P(\text{category}[i]) = P(\text{category}[i] | \text{parent}(\text{category}[i])) * P(\text{parent}(\text{category}[i]) | \text{parent}(\text{parent}(\text{category}[i]))) \ldots 
+$$</p>
 <p>Given these marginal confidences, we can compute the ordinary BCE loss.</p>
 <p>Likely, the point of entry users will be most interested in is the <code>Hierarchy</code> class, which handles caching various views of the hierarchy, and the <code>hierarchical_loss</code> function.  You will need to incorporate the loss into your existing training regimen.  After training, one may find useful the <code>optimal_hierarchical_path</code> and various <code>...truncate...</code> functions in <code>path_utils</code> for predictive purposes.  Note that the standard predictive "choose the category with the highest confidence" strategy does not work here, since the marginal probability of a child will always necessarily be less than the marginal probability of the parent.  </p>
 <h1 id="installation">Installation</h1>
