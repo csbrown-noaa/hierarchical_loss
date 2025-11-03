@@ -11,6 +11,8 @@ theme:
     - markdown.extensions.admonition
     - markdown.extensions.codehilite
     - pymdownx.superfences
+    - pymdownx.arithmatex:
+        generic: true
 
 plugins:
   - search
@@ -20,6 +22,10 @@ plugins:
         python:
           options:
             docstring_style: numpy
+
+extra_javascript:
+  -javascripts/mathjax.js
+  -https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 nav:
   - Home: README.md
