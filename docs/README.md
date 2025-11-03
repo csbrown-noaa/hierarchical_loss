@@ -8,15 +8,21 @@ The general strategy is to use the "flat" predictions from a general detection o
 
 More specifically, suppose that we have $n$ categories, and a hierarchical structure over these categories.  Suppose that our model predicts a vector $V$ for some object or image.  We interpret the logit value in index i to be:
 
-$$ V[i] := logit(P(\text{category}[i] | \text{parent}(\text{category}[i]))) $$
+$$ 
+V[i] := logit(P(\text{category}[i] | \text{parent}(\text{category}[i]))) 
+$$
 
 We can compute the raw conditional probability using a sigmoid function.
 
-$$ sigmoid(V[i]) := P(\text{category}[i] | \text{parent}(\text{category}[i])) $$
+$$ 
+sigmoid(V[i]) := P(\text{category}[i] | \text{parent}(\text{category}[i])) 
+$$
 
 We can use these to compute marginal confidences at arbitrary locations in the hierarchy:
 
-$$ P(\text{category}[i]) = P(\text{category}[i] | \text{parent}(\text{category}[i])) * P(\text{parent}(\text{category}[i]) | \text{parent}(\text{parent}(\text{category}[i]))) \ldots $$
+$$ 
+P(\text{category}[i]) = P(\text{category}[i] | \text{parent}(\text{category}[i])) * P(\text{parent}(\text{category}[i]) | \text{parent}(\text{parent}(\text{category}[i]))) \ldots 
+$$
 
 Given these marginal confidences, we can compute the ordinary BCE loss.
 
