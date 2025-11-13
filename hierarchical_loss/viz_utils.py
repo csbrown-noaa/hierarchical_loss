@@ -1,7 +1,9 @@
+from collections.abc import Hashable, Iterable
 import numpy as np
 import cv2
 from PIL import Image
 import torch
+import treelib
 
 def rescale_boxes(
     pred_boxes: np.ndarray | torch.Tensor,
@@ -108,3 +110,64 @@ def draw_boxes_on_image(
 
     return Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
 
+
+def viz_tree(
+    hierarchy: dict[int, int],
+    name_map: dict[int, str],
+    vals: Iterable[float],
+    val_format: str = ".4f"
+) -> treelib.Tree:
+    """Creates a treelib.Tree for visualizing hierarchy scores.
+
+    Builds a displayable tree by iterating through the hierarchy, walking
+    up each branch, and adding unvisited nodes in a top-down fashion.
+    Each node is labeled with its name (from `name_map`) and a
+    formatted value (from `vals`).
+
+    Parameters
+    ----------
+    hierarchy : dict[Hashable, Hashable]
+        The class hierarchy in `{child_id: parent_id}` format.
+    name_map : Dict[Hashable, str]
+        A dictionary mapping node IDs to their string names.
+    vals : Union[torch.Tensor, List[float], Dict[Hashable, float]]
+        A 1D tensor, list, or dict containing the scores to display.
+        The node IDs are used as keys/indices for this collection.
+    val_format : str, optional
+        The f-string format specifier for displaying the value,
+        by default ".4f".
+
+    Returns
+    -------
+    treelib.Tree
+        A `treelib.Tree` object, which can be printed or shown.
+        
+    Examples
+    --------
+    >>> import torch
+    >>> hierarchy = {1: 0, 2: 0, 3: 1}
+    >>> name_map = {0: 'root', 1: 'child1', 2: 'child2', 3: 'grandchild'}
+    >>> scores = torch.tensor([0.9, 0.7, 0.2, 0.5])
+    >>> tree = viz_tree(hierarchy, name_map, scores)
+    >>> tree.show()
+    root : 0.9000
+    ├── child1 : 0.7000
+    │   └── grandchild : 0.5000
+    └── child2 : 0.2000
+    <BLANKLINE>
+    """
+    tree = treelib.Tree()
+    visited = set()
+    for child, parent in hierarchy.items():
+        branch = [child, parent]
+        while parent in hierarchy and parent not in visited:
+            parent = hierarchy[parent]
+            branch.append(parent)
+        end = len(branch) - 1
+        while branch[end] in visited:
+            end -= 1
+        for j in range(end, -1, -1):
+            node = branch[j]
+            visited.add(node)
+            tree.create_node("{} : {}".format(str(name_map[node]), str(vals[node])), node, parent = hierarchy[node] if node in hierarchy else None)      
+    return tree
