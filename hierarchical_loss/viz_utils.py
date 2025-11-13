@@ -4,6 +4,7 @@ import cv2
 from PIL import Image
 import torch
 import treelib
+import collections
 
 def rescale_boxes(
     pred_boxes: np.ndarray | torch.Tensor,
@@ -114,8 +115,7 @@ def draw_boxes_on_image(
 def viz_tree(
     hierarchy: dict[int, int],
     name_map: dict[int, str],
-    vals: Iterable[float],
-    val_format: str = ".4f"
+    vals: Iterable[float] | None = None
 ) -> treelib.Tree:
     """Creates a treelib.Tree for visualizing hierarchy scores.
 
@@ -148,14 +148,22 @@ def viz_tree(
     >>> hierarchy = {1: 0, 2: 0, 3: 1}
     >>> name_map = {0: 'root', 1: 'child1', 2: 'child2', 3: 'grandchild'}
     >>> scores = torch.tensor([0.9, 0.7, 0.2, 0.5])
-    >>> tree = viz_tree(hierarchy, name_map, scores)
+    >>> tree = viz_tree(hierarchy, name_map, list(map('{:.4f}'.format, scores)))
     >>> tree.show()
     root : 0.9000
     ├── child1 : 0.7000
     │   └── grandchild : 0.5000
     └── child2 : 0.2000
     <BLANKLINE>
+    >>> tree = viz_tree(hierarchy, name_map)
+    >>> tree.show()
+    root : 
+    ├── child1 : 
+    │   └── grandchild : 
+    └── child2 : 
+    <BLANKLINE>
     """
+    vals = collections.defaultdict(str) if vals is None else vals
     tree = treelib.Tree()
     visited = set()
     for child, parent in hierarchy.items():
