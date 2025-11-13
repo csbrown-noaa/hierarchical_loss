@@ -19,6 +19,7 @@ class Hierarchy:
                  device: torch.device | str | None = None):
         
         all_nodes = set(raw_tree.keys()) | set(raw_tree.values())
+        self.raw_tree = raw_tree
 
         # 1. Build the translation maps
         if node_to_idx_map:
