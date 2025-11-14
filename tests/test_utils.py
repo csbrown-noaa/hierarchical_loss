@@ -1,5 +1,4 @@
 import unittest
-import utils
 import hierarchical_loss.utils
 import hierarchical_loss.hierarchical_loss
 import hierarchical_loss.hierarchy_tensor_utils
@@ -185,7 +184,7 @@ class TestHierarchicalIndex(unittest.TestCase):
         expected_bce = [0.19,0.45,0.13,0.30,0.31]
 
         hierarchy_index = hierarchical_loss.hierarchy_tensor_utils.build_hierarchy_index_tensor(tree)
-        actual_bce = hierarchical_loss.hierarchical_loss.hierarchical_loss(
+        actual_bce = hierarchical_loss.hierarchical_loss.hierarchical_bce(
             mock_batchify(torch.tensor([out])),
             mock_batchify(torch.tensor([target])),
             hierarchy_index

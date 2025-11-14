@@ -2,7 +2,7 @@ import torch
 from .hierarchy_tensor_utils import accumulate_hierarchy, expand_target_hierarchy
 from .utils import log1mexp
 
-def hierarchical_loss(
+def hierarchical_bce(
     pred: torch.Tensor, targets: torch.Tensor, hierarchy_index: torch.Tensor
 ) -> torch.Tensor:
     """Computes a hierarchical cross-entropy loss.
