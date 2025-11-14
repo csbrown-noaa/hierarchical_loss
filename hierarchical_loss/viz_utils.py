@@ -112,9 +112,13 @@ def draw_boxes_on_image(
     return Image.fromarray(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
 
 
+class DoNothingDict():
+    def __getitem__(self, k):
+        return k
+
 def viz_tree(
-    hierarchy: dict[int, int],
-    name_map: dict[int, str],
+    hierarchy: dict[Hashable, Hashable],
+    name_map: dict[Hashable, str] | None = None,
     vals: Iterable[float] | None = None
 ) -> treelib.Tree:
     """Creates a treelib.Tree for visualizing hierarchy scores.
@@ -129,10 +133,10 @@ def viz_tree(
     hierarchy : dict[Hashable, Hashable]
         The class hierarchy in `{child_id: parent_id}` format.
     name_map : Dict[Hashable, str]
-        A dictionary mapping node IDs to their string names.
+        A dictionary mapping node IDs to their string names.  If None, performs no mapping.
     vals : Union[torch.Tensor, List[float], Dict[Hashable, float]]
         A 1D tensor, list, or dict containing the scores to display.
-        The node IDs are used as keys/indices for this collection.
+        The node IDs are used as keys/indices for this collection.  If None, displays no values.
     val_format : str, optional
         The f-string format specifier for displaying the value,
         by default ".4f".
@@ -144,26 +148,31 @@ def viz_tree(
         
     Examples
     --------
-    >>> import torch
     >>> hierarchy = {1: 0, 2: 0, 3: 1}
     >>> name_map = {0: 'root', 1: 'child1', 2: 'child2', 3: 'grandchild'}
     >>> scores = torch.tensor([0.9, 0.7, 0.2, 0.5])
-    >>> tree = viz_tree(hierarchy, name_map, list(map('{:.4f}'.format, scores)))
-    >>> tree.show()
+    >>> viz_tree(hierarchy, name_map, list(map('{:.4f}'.format, scores))).show()
     root : 0.9000
     ├── child1 : 0.7000
     │   └── grandchild : 0.5000
     └── child2 : 0.2000
     <BLANKLINE>
-    >>> tree = viz_tree(hierarchy, name_map)
-    >>> tree.show()
+    >>> viz_tree(hierarchy, name_map).show()
     root : 
     ├── child1 : 
     │   └── grandchild : 
     └── child2 : 
     <BLANKLINE>
+    >>> tree = viz_tree(hierarchy)
+    >>> tree.show()
+    0 : 
+    ├── 1 : 
+    │   └── 3 : 
+    └── 2 : 
+    <BLANKLINE>
     """
     vals = collections.defaultdict(str) if vals is None else vals
+    name_map = DoNothingDict() if name_map is None else name_map
     tree = treelib.Tree()
     visited = set()
     for child, parent in hierarchy.items():
