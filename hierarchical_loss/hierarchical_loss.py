@@ -44,12 +44,12 @@ def hierarchical_bce(
     # This computes log(P(marginal)) = sum(log(P(c | p))) (Bayes' rule in log space)
     hierarchical_summed_logsigmoids = accumulate_hierarchy(logsigmoids, hierarchy_index, torch.sum, 0.)
     # Expand target to be 1 for the node and all its ancestors
-    hierarchical_expanded_targets = expand_target_hierarchy(targets, hierarchy_index)
+    #targets = expand_target_hierarchy(targets, hierarchy_index)
     # log(1 - s) = log(1 - P(marginal))
     #            = log(1 - exp(log(P(marginal))))
     hierarchical_summed_log1sigmoids = log1mexp(hierarchical_summed_logsigmoids)
     # Standard BCE loss: -[t*log(s) + (1-t)*log(1-s)]
     return -(
-      (hierarchical_expanded_targets * hierarchical_summed_logsigmoids) 
-      + (1 - hierarchical_expanded_targets) * hierarchical_summed_log1sigmoids
+      (targets * hierarchical_summed_logsigmoids) 
+      + (1 - targets) * hierarchical_summed_log1sigmoids
     )
