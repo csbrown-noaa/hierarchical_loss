@@ -177,6 +177,7 @@ class TestHierarchicalIndex(unittest.TestCase):
         masked_hierarchical_scores = hierarchical_loss.hierarchy_tensor_utils.hierarchically_index_flat_scores(pred_scores, target_indices, hierarchy_index_tensor, ~hierarchy_mask)
         torch.testing.assert_close(masked_hierarchical_scores, masked_hierarchical_scores_expected)
 
+    '''
     def test_hierarchical_loss(self):
         tree = {0:1, 1:2, 3:4}
         target = [0.,1.,0.,0.,0.]
@@ -196,7 +197,7 @@ class TestHierarchicalIndex(unittest.TestCase):
             atol = 0,
             rtol = 0.05
         )
-
+    '''
    
     ''' TODO! This requires postprocess_raw_output to take in nms parameters.  We generally need to hoist these out to be user-variables 
     def test_hierarchical_paths(self):

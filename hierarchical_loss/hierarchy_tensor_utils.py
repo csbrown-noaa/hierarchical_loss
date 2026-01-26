@@ -144,6 +144,48 @@ def build_hierarchy_sibling_mask(
 
     return sibling_mask
 
+def build_ancestor_mask(
+    ancestor_indices: torch.Tensor, device: torch.device | str | None = None
+) -> torch.Tensor:
+    """Creates a boolean mask identifying all ancestors from an index tensor.
+
+    This function expands the compressed (C, M) ancestor index tensor into a
+    dense (C, C) boolean matrix where `mask[i, j]` is True if node `j` is
+    present in the ancestor path of node `i`.
+
+    Parameters
+    ----------
+    ancestor_indices : torch.Tensor
+        A 2D tensor of shape `(C, M)` containing the ancestor path for each
+        node, padded with -1. This is the output of `build_hierarchy_index_tensor`.
+    device : torch.device | str | None, optional
+        The desired device for the output tensor. If `None`, uses the
+        device of `ancestor_indices`.
+
+    Returns
+    -------
+    torch.Tensor
+        A 2D boolean tensor of shape `(C, C)`. `mask[i, j]` is True if `j`
+        is an ancestor of `i`.
+    """
+    if device is None:
+        device = ancestor_indices.device
+
+    C, M = ancestor_indices.shape
+    mask = torch.zeros((C, C), dtype=torch.bool, device=device)
+
+    # 1. Create rows and explicitly expand to match (C, M)
+    # rows: (C, 1) -> (C, M)
+    rows = torch.arange(C, device=device).unsqueeze(1).expand(C, M)
+
+    # 2. Create the boolean mask for valid entries
+    valid = ancestor_indices != -1
+
+    # 3. Scatter True
+    # Now rows[valid] and ancestor_indices[valid] are both flat 1D tensors of the same size.
+    mask[rows[valid], ancestor_indices[valid].long()] = True
+
+    return mask
 
 def build_hierarchy_index_tensor(
     hierarchy: dict[int, int], device: torch.device | str | None = None
@@ -194,6 +236,82 @@ def build_hierarchy_index_tensor(
     index_tensor = torch.full((len(lens), max(lens.values())), -1, dtype=torch.int32, device=device)
     preorder_apply(hierarchy, set_indices, index_tensor)
     return index_tensor
+
+def build_ancestor_sibling_mask(
+    parent_tensor: torch.Tensor,
+    hierarchy_index_tensor: torch.Tensor,
+    device: torch.device | str | None = None
+) -> torch.Tensor:
+    """Creates an (N, N) mask of siblings, uncles, and great-uncles.
+
+    A node j is an ancestor sibling of node i if j shares a parent with i 
+    or any of i's ancestors, excluding the ancestors themselves and node i.
+
+    Parameters
+    ----------
+    parent_tensor : torch.Tensor
+        A 1D tensor of shape `(C,)`, where `C` is the number of classes.
+        `parent_tensor[i]` contains the integer ID of the parent of node `i`,
+        or -1 for root nodes.  See the `build_parent_tensor` function.
+    hierarchy_index_tensor : torch.Tensor
+        A long tensor of shape `(C, H)` mapping each category `c` to its
+        ancestral path. `H` is the max hierarchy depth.
+    device : torch.device | str | None, optional
+        The desired device for the output tensor.
+
+    Returns
+    -------
+    torch.Tensor
+        A boolean tensor of shape `(C, C)`. `mask[i, j]` is True if node `j` 
+        is an ancestor sibling of node `i`.
+
+    Examples
+    --------
+    >>> # Hierarchy: 1&2 are siblings (parent 0); 3&4 are siblings (parent 1); 
+    >>> # 5 is child of 2; 7 is child of 6.
+    >>> h = {1:0, 2:0, 3:1, 4:1, 5:2, 7:6}
+    >>> parent_tensor = build_parent_tensor(h)
+    >>> index_tensor = build_hierarchy_index_tensor(h)
+    >>> # Node 4's ancestors: [4, 1, 0]
+    >>> # Node 4's ancestor parents: [1, 0, -1]
+    >>> # Sibling groups for those parents: 
+    >>> # Parent 1 -> {3, 4}, Parent 0 -> {1, 2}, Parent -1 -> {0, 6}
+    >>> # Ancestor Siblings of 4 (excluding ancestors {4, 1, 0}): {3, 2, 6}
+    >>> mask = build_ancestor_sibling_mask(parent_tensor, index_tensor)
+    >>> torch.where(mask[4])[0].tolist()
+    [2, 3, 6]
+    >>> torch.where(mask[2])[0].tolist()
+    [1, 6]
+    """
+    C = parent_tensor.shape[0]
+
+    # 2. Map every node in the index_tensor to its parent
+    # We pad parent_tensor so index -1 maps to a unique 'virtual' parent ID
+    padding_val = -2
+    lookup_parents = torch.cat([parent_tensor, torch.tensor([padding_val], device=device)])
+    # ancestor_parents shape: (C, MaxDepth), values: parent_ids of the lineage
+    ancestor_parents = lookup_parents[hierarchy_index_tensor.long()]
+
+    # 3. Create the broad mask
+    # We check if (parent of j) is in (parents of ancestors of i)
+    # parent_tensor: (C,) -> (1, C, 1)
+    # ancestor_parents: (C, MaxDepth) -> (C, 1, MaxDepth)
+    # result: (C, C)
+    mask = (parent_tensor.view(1, C, 1) == ancestor_parents.unsqueeze(1)).any(dim=-1)
+
+    # 4. Remove 'Self' and 'Ancestors' from the mask
+    # A node shouldn't be its own ancestor sibling, nor should its father.
+    # We create a mask of the lineage to zero out.
+    lineage_mask = torch.zeros((C, C), dtype=torch.bool, device=device)
+    rows = torch.arange(C, device=device).unsqueeze(1)
+    valid_ancestors = hierarchy_index_tensor != -1
+    
+    # Scatter True into lineage_mask where hierarchy_index_tensor has valid node IDs
+    # Note: hierarchy_index_tensor[i] contains [node, parent, grandparent...]
+    lineage_mask[rows, hierarchy_index_tensor.long()] = valid_ancestors
+
+    # Final result: nodes sharing an ancestor-parent MINUS the lineage itself
+    return mask & ~lineage_mask
 
 
 def accumulate_hierarchy(

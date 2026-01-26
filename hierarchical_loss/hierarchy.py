@@ -4,7 +4,9 @@ from .tree_utils import get_roots
 from .hierarchy_tensor_utils import (
     build_parent_tensor,
     build_hierarchy_index_tensor,
-    build_hierarchy_sibling_mask
+    build_hierarchy_sibling_mask,
+    build_ancestor_sibling_mask,
+    build_ancestor_mask
 )
 from .path_utils import construct_parent_childtensor_tree
 from .utils import dict_keyvalue_replace
@@ -52,6 +54,8 @@ class Hierarchy:
         self.sibling_mask = build_hierarchy_sibling_mask(self.parent_tensor, device=device)
         self.roots = torch.tensor(get_roots(self.index_tree), device=device)
         self.parent_child_tensor_tree = construct_parent_childtensor_tree(self.index_tree, device=device)
+        self.ancestor_sibling_mask = build_ancestor_sibling_mask(self.parent_tensor, self.index_tensor, device=device)
+        self.ancestor_mask = build_ancestor_mask(self.index_tensor, device=device)
 
     def to(self, device: torch.device | str):
         """Moves all computed tensors to the specified device."""
@@ -61,4 +65,6 @@ class Hierarchy:
         self.sibling_mask = self.sibling_mask.to(device)
         self.roots = self.roots.to(device) 
         self.parent_child_tensor_tree = {k: v.to(device) for k, v in self.parent_child_tensor_tree.items()}
+        self.ancestor_sibling_mask = self.ancestor_sibling_mask.to(device)
+        self.ancestor_mask = self.ancestor_mask.to(device)
         return self
