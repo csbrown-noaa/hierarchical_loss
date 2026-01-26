@@ -54,7 +54,7 @@ def hierarchical_bce(
       + (1 - targets) * hierarchical_summed_log1sigmoids
     )
 
-def hierarchical_conditional_loss(
+def hierarchical_conditional_bce(
     pred: torch.Tensor,
     target_indices: torch.Tensor,
     ancestor_mask: torch.Tensor,
@@ -117,14 +117,14 @@ def hierarchical_conditional_loss(
     >>> pred_good = torch.tensor([[10.0, 10.0, -10.0]])
     >>> target_idx = torch.tensor([1])
     >>>
-    >>> loss_good = hierarchical_conditional_loss(pred_good, target_idx, anc_mask, sib_mask)
+    >>> loss_good = hierarchical_conditional_bce(pred_good, target_idx, anc_mask, sib_mask)
     >>> round(loss_good.item(), 5)
     5e-05
     >>>
     >>> # Case B: Wrong Prediction (High score on sibling Node 2)
     >>> # We expect penalty from Node 2 (should be 0) and Node 1 (should be 1)
     >>> pred_bad = torch.tensor([[10.0, -10.0, 10.0]])
-    >>> loss_bad = hierarchical_conditional_loss(pred_bad, target_idx, anc_mask, sib_mask)
+    >>> loss_bad = hierarchical_conditional_bce(pred_bad, target_idx, anc_mask, sib_mask)
     >>> # Loss comes from 3 active nodes (0, 1, 2).
     >>> # Node 0 is correct (~0 loss). Node 1 and 2 are wrong (~10 loss each).
     >>> # Average loss ~ 20 / 3 = 6.66
