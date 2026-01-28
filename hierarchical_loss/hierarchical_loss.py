@@ -154,6 +154,7 @@ def hierarchical_conditional_bce(
     #active_nodes = pos_mask.sum(dim=-1)# + neg_mask.sum(dim=-1)
 
     # Clamp to 1.0 to ensure numerical stability (e.g., if index is -1/ignored)
-    structure_scale = active_nodes.float().clamp(min=1.0)
+    #structure_scale = active_nodes.float().clamp(min=1.0)
+    structure_scale = 1
 
     return total_structure_loss / structure_scale
