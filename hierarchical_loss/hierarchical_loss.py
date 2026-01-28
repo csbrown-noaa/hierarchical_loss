@@ -151,7 +151,7 @@ def hierarchical_conditional_bce(
 
     # 4. Normalize by structure size (Depth + Width)
     # Count how many nodes contributed to the loss for each sample
-    active_nodes = pos_mask.sum(dim=-1) + neg_mask.sum(dim=-1)
+    active_nodes = pos_mask.sum(dim=-1)# + neg_mask.sum(dim=-1)
 
     # Clamp to 1.0 to ensure numerical stability (e.g., if index is -1/ignored)
     structure_scale = active_nodes.float().clamp(min=1.0)
