@@ -220,11 +220,11 @@ def hierarchical_conditional_bce_soft_root(
 
     # A. Descendants: Hard Target 1.0 (Optimization)
     #    Loss = -log(sigmoid(x))
-    loss_descendants = -F.logsigmoid(pred_clamped) * is_active_descendant
+    loss_descendants = -torch.nn.functional.logsigmoid(pred_clamped) * is_active_descendant
 
     # B. Uncles: Hard Target 0.0 (Rejection)
     #    Loss = -log(1 - sigmoid(x))
-    loss_uncles = -F.logsigmoid(-pred_clamped) * neg_mask
+    loss_uncles = -torch.nn.functional.logsigmoid(-pred_clamped) * neg_mask
 
     # C. Roots: Soft Target (Calibration)
     #    Target is the assigner score (e.g., 0.1)
@@ -232,7 +232,7 @@ def hierarchical_conditional_bce_soft_root(
     scores_expanded = target_scores.unsqueeze(-1)
     
     #    BCEWithLogits(x, target)
-    loss_roots_raw = F.binary_cross_entropy_with_logits(
+    loss_roots_raw = torch.nn.functional.binary_cross_entropy_with_logits(
         pred_clamped, scores_expanded, reduction='none'
     )
     #    Only apply where is_active_root is True
