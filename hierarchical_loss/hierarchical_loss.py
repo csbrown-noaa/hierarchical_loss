@@ -229,7 +229,7 @@ def hierarchical_conditional_bce_soft_root(
     # C. Roots: Soft Target (Calibration)
     #    Target is the assigner score (e.g., 0.1)
     #    We expand scores to (B, Anchors, 1) to broadcast against (B, Anchors, N)
-    scores_expanded = target_scores.unsqueeze(-1)
+    scores_expanded = target_scores.unsqueeze(-1).expand_as(pred_clamped)
     
     #    BCEWithLogits(x, target)
     loss_roots_raw = torch.nn.functional.binary_cross_entropy_with_logits(
