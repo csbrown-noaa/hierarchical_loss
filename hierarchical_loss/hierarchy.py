@@ -53,6 +53,7 @@ class Hierarchy:
         self.hierarchy_mask = self.index_tensor == -1
         self.sibling_mask = build_hierarchy_sibling_mask(self.parent_tensor, device=device)
         self.roots = torch.tensor(get_roots(self.index_tree), device=device)
+        self.root_mask = torch.zeros(self.num_classes, dtype=torch.bool, device=device).scatter_(0, self.roots, True)
         self.parent_child_tensor_tree = construct_parent_childtensor_tree(self.index_tree, device=device)
         self.ancestor_sibling_mask = build_ancestor_sibling_mask(self.parent_tensor, self.index_tensor, device=device)
         self.ancestor_mask = build_ancestor_mask(self.index_tensor, device=device)
@@ -64,6 +65,7 @@ class Hierarchy:
         self.hierarchy_mask = self.hierarchy_mask.to(device)
         self.sibling_mask = self.sibling_mask.to(device)
         self.roots = self.roots.to(device) 
+        self.root_mask = self.root_mask.to(device) 
         self.parent_child_tensor_tree = {k: v.to(device) for k, v in self.parent_child_tensor_tree.items()}
         self.ancestor_sibling_mask = self.ancestor_sibling_mask.to(device)
         self.ancestor_mask = self.ancestor_mask.to(device)

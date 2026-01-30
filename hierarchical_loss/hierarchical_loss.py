@@ -158,3 +158,88 @@ def hierarchical_conditional_bce(
     #structure_scale = 1
 
     return total_structure_loss / structure_scale
+
+
+def hierarchical_conditional_bce_soft_root(
+    pred: torch.Tensor,
+    target_scores: torch.Tensor,
+    target_indices: torch.Tensor,
+    ancestor_mask: torch.Tensor,
+    ancestor_sibling_mask: torch.Tensor,
+    root_mask: torch.Tensor,
+    clamp_val: float = 80.0
+) -> torch.Tensor:
+    """
+    Computes Hierarchical Loss with Soft Targets for Roots and Hard Targets for the Branch.
+    
+    1. Root Nodes (e.g., Mammalia): Trained with Soft Target = Assigner Score (e.g., 0.1).
+       - Enforces calibration and background suppression.
+    2. Descendants (e.g., Felidae, Felis): Trained with Hard Target = 1.0.
+       - Enforces conditional classification.
+    3. Uncles (e.g., Canidae): Trained with Hard Target = 0.0.
+       - Enforces rejection of incorrect branches.
+
+    Parameters
+    ----------
+    pred : torch.Tensor
+        Logits (B, Anchors, N).
+    target_scores : torch.Tensor
+        Assigner quality scores (B, Anchors). Used as target for Root nodes.
+    target_indices : torch.Tensor
+        Leaf class indices (B, Anchors).
+    ancestor_mask : torch.Tensor
+        (N, N) boolean mask of ancestors.
+    ancestor_sibling_mask : torch.Tensor
+        (N, N) boolean mask of uncles.
+    root_mask : torch.Tensor
+        (N,) boolean mask where True = Root Node.
+
+    Returns
+    -------
+    torch.Tensor
+        Summed loss per anchor (B, Anchors).
+    """
+    # 1. Lookup and Expand Masks
+    # Shape: (B, Anchors, N)
+    pos_mask = ancestor_mask[target_indices]
+    neg_mask = ancestor_sibling_mask[target_indices]
+    
+    # Broadcast root_mask to (1, 1, N) for logical operations
+    root_mask_expanded = root_mask.view(1, 1, -1)
+
+    # 2. Separate Positives into Roots vs Descendants
+    # Intersection: Ancestors that are ALSO roots
+    is_active_root = pos_mask & root_mask_expanded
+    # Difference: Ancestors that are NOT roots
+    is_active_descendant = pos_mask & (~root_mask_expanded)
+
+    # 3. Compute Losses
+    # Safety Clamp
+    #pred_clamped = pred.clamp(-clamp_val, clamp_val)
+    pred_clamped = pred
+
+    # A. Descendants: Hard Target 1.0 (Optimization)
+    #    Loss = -log(sigmoid(x))
+    loss_descendants = -F.logsigmoid(pred_clamped) * is_active_descendant
+
+    # B. Uncles: Hard Target 0.0 (Rejection)
+    #    Loss = -log(1 - sigmoid(x))
+    loss_uncles = -F.logsigmoid(-pred_clamped) * neg_mask
+
+    # C. Roots: Soft Target (Calibration)
+    #    Target is the assigner score (e.g., 0.1)
+    #    We expand scores to (B, Anchors, 1) to broadcast against (B, Anchors, N)
+    scores_expanded = target_scores.unsqueeze(-1)
+    
+    #    BCEWithLogits(x, target)
+    loss_roots_raw = F.binary_cross_entropy_with_logits(
+        pred_clamped, scores_expanded, reduction='none'
+    )
+    #    Only apply where is_active_root is True
+    loss_roots = loss_roots_raw * is_active_root
+
+    # 4. Sum All Components
+    # We sum across the class dimension (dim=-1)
+    total_loss = (loss_descendants + loss_uncles + loss_roots).sum(dim=-1)
+
+    return total_loss
