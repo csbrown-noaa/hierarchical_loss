@@ -345,7 +345,8 @@ def hierarchical_probabilistic_bce(
     S = target_scores.unsqueeze(-1)
 
     # 4. Safety Clamp (Prevent 0 * Inf = NaN)
-    pred_clamped = pred.clamp(-clamp_val, clamp_val)
+    #pred_clamped = pred.clamp(-clamp_val, clamp_val)
+    pred_clamped = pred
 
     # -----------------------------------------------------------------------
     # Term A: Root Calibration
