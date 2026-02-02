@@ -243,3 +243,146 @@ def hierarchical_conditional_bce_soft_root(
     total_loss = (loss_descendants + loss_uncles + loss_roots).sum(dim=-1)
 
     return total_loss
+
+
+def hierarchical_probabilistic_bce(
+    pred: torch.Tensor,
+    target_scores: torch.Tensor,
+    target_indices: torch.Tensor,
+    ancestor_mask: torch.Tensor,
+    ancestor_sibling_mask: torch.Tensor,
+    root_mask: torch.Tensor,
+    clamp_val: float = 80.0
+) -> torch.Tensor:
+    """Computes the Probabilistic Hierarchical BCE Loss based on Expected Risk.
+
+    This function implements the loss derived from minimizing the Expected Cross
+    Entropy over a latent variable Z (Object Existence). It splits the hierarchy
+    into two distinct training regimes:
+
+    1. **Root Nodes (Term A):** Trained to match the Assigner Score S.
+       - Logic: `BCE(pred, target=S)`
+       - Behavior: Calibration. Pushes Root probability to match IoU/Quality.
+         If S=0 (Background), actively suppresses the root.
+
+    2. **Branch Nodes (Term B):** Trained with Hard Targets, weighted by S.
+       - Logic: `S * BCE(pred, target=1.0)` (for Descendants)
+       - Logic: `S * BCE(pred, target=0.0)` (for Uncles)
+       - Behavior: Optimization. Pushes conditionals towards taxonomic truth,
+         but scales the gradient magnitude by the confidence that the object exists.
+
+    Parameters
+    ----------
+    pred : torch.Tensor
+        The raw logits from the model with shape `(B, Anchors, N)`.
+    target_scores : torch.Tensor
+        The "Quality Scores" (S) from the assigner with shape `(B, Anchors)`.
+        These act as the Soft Target for roots and the Gradient Weight for branches.
+    target_indices : torch.Tensor
+        LongTensor of leaf class indices with shape `(B, Anchors)`.
+    ancestor_mask : torch.Tensor
+        Boolean tensor of shape `(N, N)` where `mask[i, j]` is True if `j` is
+        an ancestor of `i`.
+    ancestor_sibling_mask : torch.Tensor
+        Boolean tensor of shape `(N, N)` where `mask[i, j]` is True if `j` is
+        an uncle of `i`.
+    root_mask : torch.Tensor
+        Boolean tensor of shape `(N,)` where True indicates a Root node.
+    clamp_val : float, optional
+        Value to clamp logits to prevent NaN during log-sigmoid operations.
+        Default is 80.0.
+
+    Returns
+    -------
+    torch.Tensor
+        A tensor of shape `(B, Anchors)` containing the summed structure loss
+        for each anchor.
+
+    Examples
+    --------
+    >>> # 1. Setup Hierarchy (0=Root, 1=Child, 2=Uncle)
+    >>> anc_mask = torch.tensor([[1,0,0], [1,1,0], [1,0,1]], dtype=torch.bool)
+    >>> sib_mask = torch.tensor([[0,0,0], [0,0,1], [0,1,0]], dtype=torch.bool)
+    >>> root_mask = torch.tensor([True, False, False], dtype=torch.bool)
+    >>>
+    >>> # 2. Inputs (Batch=1, Anchor=1)
+    >>> # Logits: Root=0.0 (50%), Child=0.0 (50%), Uncle=0.0 (50%)
+    >>> pred = torch.zeros(1, 1, 3)
+    >>> target_idx = torch.tensor([[1]]) # Target is Child
+    >>>
+    >>> # Case A: High Quality (S=0.9)
+    >>> # Root Target=0.9, Child Target=1.0 (w=0.9), Uncle Target=0.0 (w=0.9)
+    >>> s_high = torch.tensor([[0.9]])
+    >>> loss_high = hierarchical_probabilistic_bce(pred, s_high, target_idx, anc_mask, sib_mask, root_mask)
+    >>> # Root loss (BCE 0.5 vs 0.9) + 0.9 * (Child loss + Uncle loss)
+    >>> round(loss_high.item(), 4)
+    1.4699
+    >>>
+    >>> # Case B: Background (S=0.0)
+    >>> # Root Target=0.0, Child Weight=0.0, Uncle Weight=0.0
+    >>> s_bg = torch.tensor([[0.0]])
+    >>> loss_bg = hierarchical_probabilistic_bce(pred, s_bg, target_idx, anc_mask, sib_mask, root_mask)
+    >>> # Root loss (BCE 0.5 vs 0.0) only. Branch terms are zeroed.
+    >>> round(loss_bg.item(), 4)
+    0.6931
+    """
+    # 1. Expand Masks based on target indices
+    # Shape: (B, Anchors, N)
+    pos_mask = ancestor_mask[target_indices]
+    neg_mask = ancestor_sibling_mask[target_indices]
+
+    # Broadcast root_mask to match (B, Anchors, N) logic
+    # Shape: (1, 1, N) -> broadcasts automatically
+    root_mask_exp = root_mask.view(1, 1, -1)
+
+    # 2. Separate Positives into Roots vs Descendants
+    is_root = pos_mask & root_mask_exp
+    is_descendant = pos_mask & (~root_mask_exp)
+
+    # 3. Prepare Scores for Broadcasting
+    # target_scores is (B, Anchors). Expand to (B, Anchors, 1) for broadcasting against N.
+    # S represents P(Z=1)
+    S = target_scores.unsqueeze(-1)
+
+    # 4. Safety Clamp (Prevent 0 * Inf = NaN)
+    pred_clamped = pred.clamp(-clamp_val, clamp_val)
+
+    # -----------------------------------------------------------------------
+    # Term A: Root Calibration
+    # Target is S. We treat S as a probability target.
+    # Logic: -[S * log(p) + (1-S) * log(1-p)]
+    # -----------------------------------------------------------------------
+    # Note: We must expand S to (B, Anchors, N) to satisfy binary_cross_entropy_with_logits strictness
+    S_expanded = S.expand_as(pred_clamped)
+    
+    loss_root_raw = torch.nn.functional.binary_cross_entropy_with_logits(
+        pred_clamped, S_expanded, reduction='none'
+    )
+    # Apply mask: Only count this loss for the active Root nodes
+    loss_term_a = loss_root_raw * is_root
+
+    # -----------------------------------------------------------------------
+    # Term B: Branch Optimization
+    # Target is Hard 1.0 (Descendants) or 0.0 (Uncles).
+    # Weight is S.
+    # Logic: S * -log(p)   OR   S * -log(1-p)
+    # -----------------------------------------------------------------------
+    
+    # Descendants (Target 1.0) -> -log(sigmoid(x))
+    loss_desc_raw = -torch.nn.functional.logsigmoid(pred_clamped)
+    
+    # Uncles (Target 0.0) -> -log(1 - sigmoid(x)) -> -log(sigmoid(-x))
+    loss_uncle_raw = -torch.nn.functional.logsigmoid(-pred_clamped)
+
+    # Apply Masks and Weighting (S)
+    # Note: S broadcasts from (B, Anchors, 1) to (B, Anchors, N)
+    loss_term_b = (
+        (loss_desc_raw * is_descendant) + 
+        (loss_uncle_raw * neg_mask)
+    ) * S
+
+    # 5. Summation
+    # Sum across classes (dim=-1) to get total loss per anchor
+    total_loss = (loss_term_a + loss_term_b).sum(dim=-1)
+
+    return total_loss
