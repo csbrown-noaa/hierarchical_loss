@@ -387,3 +387,110 @@ def hierarchical_probabilistic_bce(
     total_loss = (loss_term_a + loss_term_b).sum(dim=-1)
 
     return total_loss
+
+
+
+
+
+def hierarchical_probabilistic_bce(
+    pred: torch.Tensor,
+    target_scores: torch.Tensor,
+    target_indices: torch.Tensor,
+    ancestor_mask: torch.Tensor,
+    ancestor_sibling_mask: torch.Tensor,
+    root_mask: torch.Tensor,
+    clamp_val: float = 80.0
+) -> torch.Tensor:
+    """Computes the Probabilistic Hierarchical BCE Loss based on Expected Risk.
+
+    This function implements the loss derived from minimizing the Expected Cross
+    Entropy over a latent variable Z (Object Existence).
+
+    It groups the loss terms by the latent event Z:
+
+    1. **Object Exists (Z=1):** The box contains the target.
+       - Weight: S (Assigner Score).
+       - Positives (Root + Ancestors): Trained towards 1.0.
+       - Negatives (Uncles): Trained towards 0.0.
+
+    2. **Background (Z=0):** The box is empty.
+       - Weight: (1-S).
+       - Root Node Only: Trained towards 0.0 (Active Suppression).
+       - Descendants/Uncles: Ignored (Masked out).
+
+    Parameters
+    ----------
+    pred : torch.Tensor
+        The raw logits from the model with shape `(B, Anchors, N)`.
+    target_scores : torch.Tensor
+        The "Quality Scores" (S) from the assigner with shape `(B, Anchors)`.
+        These represent P(Z=1).
+    target_indices : torch.Tensor
+        LongTensor of leaf class indices with shape `(B, Anchors)`.
+    ancestor_mask : torch.Tensor
+        Boolean tensor of shape `(N, N)` where `mask[i, j]` is True if `j` is
+        an ancestor of `i`.
+    ancestor_sibling_mask : torch.Tensor
+        Boolean tensor of shape `(N, N)` where `mask[i, j]` is True if `j` is
+        an uncle of `i`.
+    root_mask : torch.Tensor
+        Boolean tensor of shape `(N,)` where True indicates a Root node.
+    clamp_val : float, optional
+        Value to clamp logits to prevent NaN during log-sigmoid operations.
+        Default is 80.0.
+
+    Returns
+    -------
+    torch.Tensor
+        A tensor of shape `(B, Anchors)` containing the summed structure loss
+        for each anchor.
+    """
+    # 1. Expand Masks based on target indices
+    # Shape: (B, Anchors, N)
+    pos_mask = ancestor_mask[target_indices]
+    neg_mask = ancestor_sibling_mask[target_indices]
+
+    # Broadcast root_mask to match (B, Anchors, N) logic
+    # Shape: (1, 1, N) -> broadcasts automatically
+    root_mask_exp = root_mask.view(1, 1, -1)
+
+    # 2. Prepare Scores for Broadcasting
+    # S represents P(Z=1). S_inv represents P(Z=0).
+    # Expand to (B, Anchors, 1) for broadcasting against N.
+    S = target_scores.unsqueeze(-1)
+    S_inv = 1.0 - S
+
+    # 3. Safety Clamp (Prevent 0 * Inf = NaN)
+    pred_clamped = pred.clamp(-clamp_val, clamp_val)
+    
+    # Pre-calculate log-probabilities
+    # log(p)
+    log_p = -torch.nn.functional.logsigmoid(pred_clamped)
+    # log(1-p)
+    log_not_p = -torch.nn.functional.logsigmoid(-pred_clamped)
+
+    # -----------------------------------------------------------------------
+    # Term 1: The "Object Exists" Case (Z=1)
+    # Weight: S
+    # Scope: Entire Positive Path (Root + Ancestors) -> Target 1.0
+    #        Uncles -> Target 0.0
+    # -----------------------------------------------------------------------
+    loss_object_exists = (
+        (log_p * pos_mask) +       # Reward Ancestors
+        (log_not_p * neg_mask)     # Punish Uncles
+    ) * S
+
+    # -----------------------------------------------------------------------
+    # Term 2: The "Background" Case (Z=0)
+    # Weight: (1-S)
+    # Scope: Only the Root Node -> Target 0.0
+    # -----------------------------------------------------------------------
+    # We only apply background suppression to the Root.
+    # If Z=0, the deeper nodes are undefined, so we do not train them.
+    loss_background = (log_not_p * root_mask_exp) * S_inv
+
+    # 4. Summation
+    # Sum across classes (dim=-1) to get total loss per anchor
+    total_loss = (loss_object_exists + loss_background).sum(dim=-1)
+
+    return total_loss
