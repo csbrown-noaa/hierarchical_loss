@@ -58,6 +58,11 @@ class Hierarchy:
         self.ancestor_sibling_mask = build_ancestor_sibling_mask(self.parent_tensor, self.index_tensor, device=device)
         self.ancestor_mask = build_ancestor_mask(self.index_tensor, device=device)
 
+        valid_mask = self.index_tensor != -1
+        last_valid_idx = valid_mask.sum(dim=1) - 1
+        # Gather the root index for every node
+        self.node_to_root = self.index_tensor[torch.arange(self.num_classes, device=device), last_valid_idx]
+
     def to(self, device: torch.device | str):
         """Moves all computed tensors to the specified device."""
         self.parent_tensor = self.parent_tensor.to(device)
@@ -69,4 +74,5 @@ class Hierarchy:
         self.parent_child_tensor_tree = {k: v.to(device) for k, v in self.parent_child_tensor_tree.items()}
         self.ancestor_sibling_mask = self.ancestor_sibling_mask.to(device)
         self.ancestor_mask = self.ancestor_mask.to(device)
+        self.node_to_root = self.node_to_root.to(device)
         return self
