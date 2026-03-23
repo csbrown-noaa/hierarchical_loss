@@ -1,10 +1,8 @@
 import requests
 
-
 WORMS_TREE_URL = 'https://www.marinespecies.org/rest/AphiaClassificationByAphiaID/{}'
 WORMS_NAME_URL = 'https://www.marinespecies.org/rest/AphiaNameByAphiaID/{}'
 WORMS_ID_URL = 'https://www.marinespecies.org/rest/AphiaIDByName/{}?marine_only=true&extant_only=true'
-
 
 def get_WORMS_id(name: str) -> int:
     """Fetches the AphiaID from WORMS for a given scientific name.
@@ -25,8 +23,21 @@ def get_WORMS_id(name: str) -> int:
     1828
     """
     result = requests.get(WORMS_ID_URL.format(name))
-    return int(result.content)
-
+    
+    # DEBUG: Catch empty responses or HTTP errors
+    if result.status_code == 204:
+        raise ValueError(f"DEBUG: WoRMS API returned 204 No Content. Name '{name}' not found.")
+    if not result.ok:
+        raise ValueError(f"DEBUG: API error for name '{name}': HTTP {result.status_code}")
+        
+    try:
+        aphia_id = int(result.content)
+        if aphia_id < 0:
+            print(f"WARNING: WoRMS returned a negative ID ({aphia_id}) for name '{name}'")
+        return aphia_id
+    except ValueError as e:
+        print(f"DEBUG: Failed to parse AphiaID for '{name}'. Response: {result.content}")
+        raise e
 
 def get_WORMS_name(WORMS_id: int) -> str:
     """Fetches the scientific name from WORMS for a given AphiaID.
@@ -90,18 +101,26 @@ def get_WORMS_tree(organism_id: int | str) -> dict:
                     "scientificname": "Vertebrata",
                     "child": {
                         "AphiaID": 1828,
-                        "rank": "Infraphylum",
-                        "scientificname": "Gnathostomata",
-                        "child": null
-                    }
+                    "rank": "Infraphylum",
+                    "scientificname": "Gnathostomata",
+                    "child": null
                 }
             }
         }
     }
     """
     result = requests.get(WORMS_TREE_URL.format(organism_id))
-    return result.json()
-
+    
+    if not result.ok:
+        raise ValueError(f"DEBUG: API error fetching tree for ID {organism_id}: HTTP {result.status_code} - {result.text}")
+        
+    data = result.json()
+    
+    # DEBUG: Catch valid JSON that is actually an error payload
+    if isinstance(data, dict) and data.get('success') is False:
+        raise ValueError(f"DEBUG: WoRMS API Error for AphiaID {organism_id}: {data}")
+        
+    return data
 
 def WORMS_tree_to_childparent_tree(worms_trees: list[dict]) -> dict[int, int]:
     """Converts one or more WORMS classification trees into a {child: parent} dict.
@@ -179,8 +198,6 @@ def WORMS_tree_to_childparent_tree(worms_trees: list[dict]) -> dict[int, int]:
             parent = child
     return childparent_tree
 
-       
-
 def WORMS_tree_to_name_hierarchy(worms_trees: list[dict]) -> tuple[dict[str, str], dict[str, int]]:
     """Converts one or more WORMS classification trees into name-based mappings.
 
@@ -236,4 +253,4 @@ def WORMS_tree_to_name_hierarchy(worms_trees: list[dict]) -> tuple[dict[str, str
             parent_name = name
             current_node = current_node.get('child')
             
-    return hierarchy_tree, name_to_id 
+    return hierarchy_tree, name_to_id
