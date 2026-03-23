@@ -57,6 +57,8 @@ class WormsCocoExpander:
             
         self.hierarchy_tree: dict[str, str] = {}
         self.name_to_id: dict[str, int] = {}
+        self._to_lookup: set[str] = set()
+        self._deferred: set[str] = set()
         self.master_coco_dummy: dict[str, list] = {
             "images": [], 
             "annotations": [], 
@@ -75,33 +77,39 @@ class WormsCocoExpander:
         *coco_dicts : dict
             An arbitrary number of COCO-formatted dictionaries to scan for taxa.
         """
-        # 1. Extract all unique names from all incoming datasets
-        all_names = set()
-        for c_dict in coco_dicts:
-            for cat in c_dict.get('categories', []):
-                all_names.add(cat['name'])
+        self._extract_unique_names(*coco_dicts)
+        self._process_graph_discovery()
+        self._rescue_orphans()
+        self._log_true_orphans()
+        self._compile_dummy_dataset()
 
-        to_lookup = set(all_names)
-        deferred = set()
-        
+    def _extract_unique_names(self, *coco_dicts: dict) -> None:
+        """Collects all unique taxonomic names from the datasets and initializes state."""
+        self._to_lookup.clear()
+        self._deferred.clear()
         self.hierarchy_tree.clear()
         self.name_to_id.clear()
 
-        # 2. Deferred Resolution Discovery Loop
-        while to_lookup:
-            name = to_lookup.pop()
+        for c_dict in coco_dicts:
+            for cat in c_dict.get('categories', []):
+                self._to_lookup.add(cat['name'])
+
+    def _process_graph_discovery(self) -> None:
+        """Pops names, performs optimistic ID fetches, and retroactively resolves using tree context."""
+        while self._to_lookup:
+            name = self._to_lookup.pop()
             
             # Optimistic ID fetch
             try:
                 aphia_id = worms_utils.get_WORMS_id(name)
-            except ValueError as e:
+            except ValueError:
                 # Catch 204 No Content or HTTP errors and defer them
-                deferred.add(name)
+                self._deferred.add(name)
                 continue
 
             if aphia_id < 0:
                 # Catch -999 (Ambiguous multiple matches) and defer them
-                deferred.add(name)
+                self._deferred.add(name)
                 continue
                 
             # Tree Harvest (If ID succeeded)
@@ -123,29 +131,48 @@ class WormsCocoExpander:
             
             # Retroactively clear all discovered contextual nodes from our sets
             for discovered_name in new_name_id_map.keys():
-                to_lookup.discard(discovered_name)
-                deferred.discard(discovered_name)
+                self._to_lookup.discard(discovered_name)
+                self._deferred.discard(discovered_name)
 
-        # 3. Orphan Review
-        if deferred:
+    def _rescue_orphans(self) -> None:
+        """Attempts to rescue true orphans using strict exact-match accepted-status disambiguation."""
+        for orphan_name in list(self._deferred):
+            try:
+                rescued_id = worms_utils.disambiguate_taxon(orphan_name)
+                
+                # If rescue succeeds, we must fetch its tree to capture its parent hierarchy
+                tree = worms_utils.get_WORMS_tree(rescued_id)
+                new_hierarchy, new_name_id_map = worms_utils.WORMS_tree_to_name_hierarchy([tree])
+                
+                self.hierarchy_tree.update(new_hierarchy)
+                self.name_to_id.update(new_name_id_map)
+                
+                # Safely remove it from deferred now that it's successfully resolved
+                self._deferred.remove(orphan_name)
+            except ValueError:
+                # Disambiguation failed (0 or >1 matches); leave it in deferred.
+                pass
+
+    def _log_true_orphans(self) -> None:
+        """Prints loud warnings for any names that survived both contextual and rescue passes."""
+        if self._deferred:
             print("\n" + "="*70)
             print("WARNING: TRUE TAXONOMIC ORPHANS DETECTED")
             print("="*70)
             print("The following names returned ambiguous results or errors from WoRMS")
-            print("and had NO related phylogenetic taxa in the datasets to implicitly")
-            print("resolve them via tree context. These require manual curation:")
-            for orphan in sorted(deferred):
+            print("and could not be resolved contextually or via strict disambiguation.")
+            print("These require manual curation:")
+            for orphan in sorted(self._deferred):
                 print(f" - {orphan}")
             print("="*70 + "\n")
 
-        # 4. Build the master dummy COCO object containing the superset of all taxonomy nodes
+    def _compile_dummy_dataset(self) -> None:
+        """Sorts the final name mapping and builds the master dummy COCO categories block."""
         categories = [
             {'id': i + 1, 'name': name} 
             for i, name in enumerate(sorted(self.name_to_id.keys()))
         ]
-        
         self.master_coco_dummy['categories'] = categories
-
 
     def align_dataset(self, target_coco: dict) -> dict:
         """

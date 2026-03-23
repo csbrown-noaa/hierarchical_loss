@@ -3,6 +3,47 @@ import requests
 WORMS_TREE_URL = 'https://www.marinespecies.org/rest/AphiaClassificationByAphiaID/{}'
 WORMS_NAME_URL = 'https://www.marinespecies.org/rest/AphiaNameByAphiaID/{}'
 WORMS_ID_URL = 'https://www.marinespecies.org/rest/AphiaIDByName/{}?marine_only=true&extant_only=true'
+WORMS_RECORDS_URL = 'https://www.marinespecies.org/rest/AphiaRecordsByName/{}'
+
+def disambiguate_taxon(name: str) -> int:
+    """Attempts to unambiguously resolve a taxon name that returned multiple matches.
+
+    Filters the results from AphiaRecordsByName for exact string matches
+    that have an 'accepted' taxonomic status.
+
+    Parameters
+    ----------
+    name : str
+        The scientific name to disambiguate.
+
+    Returns
+    -------
+    int
+        The accepted AphiaID.
+
+    Raises
+    ------
+    ValueError
+        If zero or multiple exact accepted matches are found.
+    """
+    result = requests.get(WORMS_RECORDS_URL.format(name))
+    if not result.ok:
+        raise ValueError(f"DEBUG: Failed to fetch records for disambiguation of '{name}'")
+
+    records = result.json()
+
+    # Filter for exact name match AND accepted status
+    valid_records = [
+        r for r in records
+        if r.get('scientificname') == name and r.get('status') == 'accepted'
+    ]
+
+    if len(valid_records) == 1:
+        return valid_records[0]['AphiaID']
+    elif len(valid_records) == 0:
+        raise ValueError(f"Disambiguation failed: No 'accepted' exact match found for '{name}'.")
+    else:
+        raise ValueError(f"Disambiguation failed: Multiple 'accepted' exact matches for '{name}'.")
 
 def get_WORMS_id(name: str) -> int:
     """Fetches the AphiaID from WORMS for a given scientific name.
