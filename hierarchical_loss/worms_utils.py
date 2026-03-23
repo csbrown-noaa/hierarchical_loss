@@ -179,4 +179,61 @@ def WORMS_tree_to_childparent_tree(worms_trees: list[dict]) -> dict[int, int]:
             parent = child
     return childparent_tree
 
-        
+       
+
+def WORMS_tree_to_name_hierarchy(worms_trees: list[dict]) -> tuple[dict[str, str], dict[str, int]]:
+    """Converts one or more WORMS classification trees into name-based mappings.
+
+    This function processes a list of nested tree structures (as returned by
+    `get_WORMS_tree`) and flattens them into two dictionaries: one mapping
+    child names to parent names, and one mapping all names to their AphiaIDs.
+
+    Parameters
+    ----------
+    worms_trees : list[dict]
+        A list of nested tree structures from the WORMS API.
+
+    Returns
+    -------
+    tuple[dict[str, str], dict[str, int]]
+        A tuple containing:
+        - hierarchy_tree: dict representing {child_scientificname: parent_scientificname}
+        - name_to_id: dict representing {scientificname: AphiaID}
+
+    Examples
+    --------
+    >>> tree = {
+    ...     "AphiaID": 1, "scientificname": "Biota", "child": {
+    ...         "AphiaID": 2, "scientificname": "Animalia", "child": None
+    ...     }
+    ... }
+    >>> hierarchy_tree, name_to_id = WORMS_tree_to_name_hierarchy([tree])
+    >>> hierarchy_tree
+    {'Animalia': 'Biota'}
+    >>> name_to_id
+    {'Biota': 1, 'Animalia': 2}
+    """
+    hierarchy_tree = {}
+    name_to_id = {}
+    
+    for tree in worms_trees:
+        parent_name = None
+        current_node = tree
+        while current_node:
+            try:
+                name = current_node['scientificname']
+                aphia_id = current_node['AphiaID']
+            except KeyError as e:
+                print("Could not find name or id")
+                print(current_node)
+                raise e
+            
+            name_to_id[name] = aphia_id
+            
+            if parent_name:
+                hierarchy_tree[name] = parent_name
+            
+            parent_name = name
+            current_node = current_node.get('child')
+            
+    return hierarchy_tree, name_to_id 
