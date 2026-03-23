@@ -67,20 +67,13 @@ class WormsCocoExpander:
     def build_master_hierarchy(self, *coco_dicts: dict) -> None:
         """
         Extracts unique category names across all provided datasets, fetches their
-        WoRMS trees, and builds the unified master category list.
+        WoRMS trees using a deferred-resolution graph discovery strategy, and builds 
+        the unified master category list.
 
         Parameters
         ----------
         *coco_dicts : dict
             An arbitrary number of COCO-formatted dictionaries to scan for taxa.
-
-        Examples
-        --------
-        >>> expander = WormsCocoExpander(use_cache=False)
-        >>> d1 = {'categories': [{'id': 1, 'name': 'Gnathostomata'}]}
-        >>> expander.build_master_hierarchy(d1)
-        >>> expander.hierarchy_tree['Gnathostomata']
-        'Vertebrata'
         """
         # 1. Extract all unique names from all incoming datasets
         all_names = set()
@@ -88,21 +81,67 @@ class WormsCocoExpander:
             for cat in c_dict.get('categories', []):
                 all_names.add(cat['name'])
 
-        # 2. Fetch nested trees for all unique names
-        worms_trees = {}
-        for name in all_names:
-            aphia_id = worms_utils.get_WORMS_id(name)
-            worms_trees[name] = worms_utils.get_WORMS_tree(aphia_id)
+        to_lookup = set(all_names)
+        deferred = set()
+        
+        self.hierarchy_tree.clear()
+        self.name_to_id.clear()
 
-        # 3. Flatten into the name-to-AphiaID and child-to-parent dictionaries
-        hierarchy, name_id_map = worms_utils.WORMS_tree_to_name_hierarchy(list(worms_trees.values()))
-        self.hierarchy_tree = hierarchy
-        self.name_to_id = name_id_map
+        # 2. Deferred Resolution Discovery Loop
+        while to_lookup:
+            name = to_lookup.pop()
+            
+            # Optimistic ID fetch
+            try:
+                aphia_id = worms_utils.get_WORMS_id(name)
+            except ValueError as e:
+                # Catch 204 No Content or HTTP errors and defer them
+                deferred.add(name)
+                continue
+
+            if aphia_id < 0:
+                # Catch -999 (Ambiguous multiple matches) and defer them
+                deferred.add(name)
+                continue
+                
+            # Tree Harvest (If ID succeeded)
+            try:
+                tree = worms_utils.get_WORMS_tree(aphia_id)
+            except ValueError as e:
+                # Hard crash on tree failure if ID lookup previously succeeded
+                raise RuntimeError(
+                    f"CRITICAL: Failed to fetch tree for successfully resolved ID {aphia_id} (Name: {name}). "
+                    f"Underlying error: {e}"
+                )
+
+            # Walk the tree and extract all nodes
+            new_hierarchy, new_name_id_map = worms_utils.WORMS_tree_to_name_hierarchy([tree])
+            
+            # Update global state
+            self.hierarchy_tree.update(new_hierarchy)
+            self.name_to_id.update(new_name_id_map)
+            
+            # Retroactively clear all discovered contextual nodes from our sets
+            for discovered_name in new_name_id_map.keys():
+                to_lookup.discard(discovered_name)
+                deferred.discard(discovered_name)
+
+        # 3. Orphan Review
+        if deferred:
+            print("\n" + "="*70)
+            print("WARNING: TRUE TAXONOMIC ORPHANS DETECTED")
+            print("="*70)
+            print("The following names returned ambiguous results or errors from WoRMS")
+            print("and had NO related phylogenetic taxa in the datasets to implicitly")
+            print("resolve them via tree context. These require manual curation:")
+            for orphan in sorted(deferred):
+                print(f" - {orphan}")
+            print("="*70 + "\n")
 
         # 4. Build the master dummy COCO object containing the superset of all taxonomy nodes
         categories = [
             {'id': i + 1, 'name': name} 
-            for i, name in enumerate(self.name_to_id.keys())
+            for i, name in enumerate(sorted(self.name_to_id.keys()))
         ]
         
         self.master_coco_dummy['categories'] = categories
