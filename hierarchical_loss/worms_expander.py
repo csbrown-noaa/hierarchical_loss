@@ -192,6 +192,11 @@ class WormsCocoExpander:
         dict
             A new, fully aligned COCO dictionary.
         """
+        # Deepcopy ONLY the small master dummy to protect it across multiple 
+        # dataset alignments, while intentionally leaving target_coco to be 
+        # mutated in-place to conserve memory on massive datasets.
+        dummy_copy = copy.deepcopy(self.master_coco_dummy)
+
         # Ensure base keys exist so pycocowriter doesn't throw KeyErrors during merge
         safe_target = {
             'images': target_coco.get('images', []),
@@ -203,7 +208,7 @@ class WormsCocoExpander:
             safe_target['info'] = target_coco['info']
 
         # Leverage pycocowriter to merge, collapse duplicates, and reindex seamlessly
-        aligned = pycocowriter.cocomerge.coco_merge(safe_target, self.master_coco_dummy)
+        aligned = pycocowriter.cocomerge.coco_merge(safe_target, dummy_copy)
         aligned = pycocowriter.cocomerge.coco_collapse_categories(aligned)
         aligned = pycocowriter.cocomerge.coco_reindex_categories(aligned)
         
