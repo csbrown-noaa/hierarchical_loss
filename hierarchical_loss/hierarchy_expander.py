@@ -194,15 +194,15 @@ class HierarchicalCocoAligner:
         return aligned
 
 
-def verify_alignment(orig_mapping: dict[int, str], new_coco: dict, split_name: str) -> None:
+def verify_alignment(orig_mapping: list[str], new_coco: dict, split_name: str) -> None:
     """
     Verifies that the aligned annotations mathematically mapped to the correct 
-    taxonomic names.
+    taxonomic names, using sequential order rather than IDs.
 
     Parameters
     ----------
-    orig_mapping : dict[int, str]
-        A dictionary mapping original `annotation_id` to its original `category_name`.
+    orig_mapping : list[str]
+        A list containing the original `category_name` for each annotation, in sequence.
     new_coco : dict
         The newly aligned COCO dictionary to be verified.
     split_name : str
@@ -211,11 +211,12 @@ def verify_alignment(orig_mapping: dict[int, str], new_coco: dict, split_name: s
     Raises
     ------
     AssertionError
-        If any annotation's mapped category name differs from its original name.
+        If any annotation's mapped category name differs from its original name,
+        or if the total number of annotations changes.
 
     Examples
     --------
-    >>> orig_map = {1: "dog", 2: "cat"}
+    >>> orig_map = ["dog", "cat"]
     >>> aligned_coco = {
     ...     "categories": [{"id": 10, "name": "cat"}, {"id": 20, "name": "dog"}],
     ...     "annotations": [
@@ -227,11 +228,14 @@ def verify_alignment(orig_mapping: dict[int, str], new_coco: dict, split_name: s
       -> Data quality assertions passed for test_split split!
     """
     category_map_new = {cat['id']: cat for cat in new_coco.get('categories', [])}
+    new_annotations = new_coco.get('annotations', [])
     
-    for ann in new_coco.get('annotations', []):
-        old_cat_name = orig_mapping[ann['id']]
+    assert len(orig_mapping) == len(new_annotations), f"Annotation count mismatch in {split_name} split!"
+    
+    for i, ann in enumerate(new_annotations):
+        old_cat_name = orig_mapping[i]
         new_cat_name = category_map_new[ann['category_id']]['name']
-        assert old_cat_name == new_cat_name, f"Category mapping failed: {old_cat_name} != {new_cat_name}"
+        assert old_cat_name == new_cat_name, f"Category mapping failed at index {i}: {old_cat_name} != {new_cat_name}"
         
     print(f"  -> Data quality assertions passed for {split_name} split!")
 
@@ -289,7 +293,7 @@ def process_hierarchical_dataset(data_dir: str, coco_sources: list[str], taxonom
             
             # Cache original mappings for downstream assertions
             cat_map = {cat['id']: cat['name'] for cat in coco_dict.get('categories', [])}
-            orig_map = {ann['id']: cat_map[ann['category_id']] for ann in coco_dict.get('annotations', [])}
+            orig_map = [cat_map[ann['category_id']] for ann in coco_dict.get('annotations', [])]
             
             raw_datasets.append({
                 'split': split,
