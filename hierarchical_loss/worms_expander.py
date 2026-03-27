@@ -7,7 +7,6 @@ import urllib.request
 import json
 import shutil
 import argparse
-import pycocowriter.coco2yolo
 import pycocowriter.cocomerge
 
 from . import worms_utils
@@ -355,12 +354,6 @@ def expand_and_align_dataset(data_dir: str, coco_sources: list[str]) -> None:
     hierarchy_json_path = os.path.join(hierarchy_dir, 'hierarchy.json')
     with open(hierarchy_json_path, 'w') as f:
         json.dump(expander.hierarchy_tree, f, indent=4)
-
-    # 6. Convert to YOLO
-    print("\nConverting aligned datasets to YOLO format...")
-    # Filter out empty splits to prevent pycocowriter loops
-    active_splits = {k: v for k, v in aligned_paths.items() if v}
-    pycocowriter.coco2yolo.coco2yolo(active_splits, data_dir)
     
     print(f"\nPipeline Complete. Master datasets and models are ready in: {data_dir}")
 
