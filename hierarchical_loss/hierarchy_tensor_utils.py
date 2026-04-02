@@ -415,6 +415,49 @@ def accumulate_hierarchy(
 
     return final_values
 
+def conditional_to_marginal(
+    preds: torch.Tensor,
+    hierarchy_index: torch.Tensor,
+) -> torch.Tensor:
+    """
+    Converts conditional probabilities to marginal probabilities
+    by multiplying them down the phylogenetic tree.
+
+    This function operates directly in linear probability space. It assumes 
+    the inputs have already been passed through a sigmoid activation.
+
+    Parameters
+    ----------
+    preds : torch.Tensor
+        A tensor of shape `[B, D, N]` containing the model's predictions, where 
+        `B` is batch size, `D` is number of detections, and `N` is number of classes.
+    hierarchy_index : torch.Tensor
+        An int tensor of shape `[N, M]` encoding the hierarchy, where `N` is the
+        number of classes and `M` is the maximum hierarchy depth.
+
+    Returns
+    -------
+    torch.Tensor
+        A tensor of shape `[B, D, N]` containing the marginal probabilities 
+        in the range [0, 1].
+        
+    Examples
+    --------
+    >>> # C=3. 0 is parent of 1, 1 is parent of 2.
+    >>> hierarchy_index = torch.tensor([[0, -1, -1], [1, 0, -1], [2, 1, 0]])
+    >>> # Probabilities for a single bounding box: P(0)=0.9, P(1|0)=0.5, P(2|1)=0.1
+    >>> cond_probs = torch.tensor([[[0.9, 0.5, 0.1]]])
+    >>> marginals = conditional_to_marginal(cond_probs, hierarchy_index)
+    >>> print(marginals)
+    tensor([[[0.9000, 0.4500, 0.0450]]])
+    """
+    return accumulate_hierarchy(
+        predictions=preds,
+        hierarchy_index=hierarchy_index,
+        reduce_op=torch.prod,
+        identity_value=1.0
+    )
+
 def hierarchically_index_flat_scores(
     flat_scores: torch.Tensor,
     target_indices: torch.Tensor,
