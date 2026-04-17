@@ -1,8 +1,4 @@
 import copy
-import os
-import urllib.request
-import json
-import shutil
 import pycocowriter.cocomerge
 from abc import ABC, abstractmethod
 
@@ -40,24 +36,23 @@ class TaxonomyProvider(ABC):
 
 class StaticTaxonomyProvider(TaxonomyProvider):
     """
-    A TaxonomyProvider that loads a contrived, pre-computed hierarchy from disk.
+    A TaxonomyProvider that loads a contrived, pre-computed hierarchy dictionary.
     
     Ideal for local datasets like COCO where the tree structure is already known
     and static.
 
     Parameters
     ----------
-    hierarchy_json_path : str
-        The absolute or relative path to the pre-computed hierarchy JSON file.
-        The JSON should represent a flat dictionary mapping {child: parent}.
+    hierarchy_tree : dict[str, str]
+        A flat dictionary mapping {child: parent} representing the taxonomy.
     """
-    def __init__(self, hierarchy_json_path: str) -> None:
+    def __init__(self, hierarchy_tree: dict[str, str]) -> None:
         super().__init__()
-        self.hierarchy_json_path: str = hierarchy_json_path
+        self.hierarchy_tree = hierarchy_tree
 
     def build_master_hierarchy(self, *coco_dicts: dict) -> None:
         """
-        Loads the static tree, validates it for circular references, and maps 
+        Validates the static tree for circular references, and maps 
         all unique nodes to a contiguous 1-to-N ID space.
 
         Parameters
@@ -68,17 +63,9 @@ class StaticTaxonomyProvider(TaxonomyProvider):
 
         Raises
         ------
-        FileNotFoundError
-            If the specified hierarchy JSON file does not exist.
         ValueError
             If a circular reference is detected in the provided taxonomy tree.
         """
-        if not os.path.exists(self.hierarchy_json_path):
-            raise FileNotFoundError(f"Static hierarchy file not found: {self.hierarchy_json_path}")
-            
-        with open(self.hierarchy_json_path, 'r') as f:
-            self.hierarchy_tree = json.load(f)
-
         # 1. Validate the tree (check for circular references)
         for node in self.hierarchy_tree:
             visited = set()
@@ -158,20 +145,6 @@ class HierarchicalCocoAligner:
         -------
         dict
             A new, fully aligned COCO dictionary.
-
-        Examples
-        --------
-        >>> aligner = HierarchicalCocoAligner(
-        ...     hierarchy_tree={'dog': 'animal', 'animal': 'animal'},
-        ...     name_to_id={'animal': 1, 'dog': 2}
-        ... )
-        >>> raw_dataset = {
-        ...     'categories': [{'id': 99, 'name': 'dog'}],
-        ...     'annotations': [{'id': 1, 'category_id': 99, 'image_id': 1}]
-        ... }
-        >>> aligned = aligner.align_dataset(raw_dataset)
-        >>> aligned['annotations'][0]['category_id']
-        2
         """
         # Deepcopy ONLY the small master dummy to protect it across multiple dataset alignments
         dummy_copy = copy.deepcopy(self.master_coco_dummy)
@@ -194,7 +167,7 @@ class HierarchicalCocoAligner:
         return aligned
 
 
-def verify_alignment(orig_mapping: list[str], new_coco: dict, split_name: str) -> None:
+def verify_alignment(orig_mapping: list[str], new_coco: dict, dataset_name: str) -> None:
     """
     Verifies that the aligned annotations mathematically mapped to the correct 
     taxonomic names, using sequential order rather than IDs.
@@ -205,138 +178,75 @@ def verify_alignment(orig_mapping: list[str], new_coco: dict, split_name: str) -
         A list containing the original `category_name` for each annotation, in sequence.
     new_coco : dict
         The newly aligned COCO dictionary to be verified.
-    split_name : str
-        The string identifier for the dataset split (used for logging output).
+    dataset_name : str
+        The string identifier for the dataset (used for logging output).
 
     Raises
     ------
     AssertionError
         If any annotation's mapped category name differs from its original name,
         or if the total number of annotations changes.
-
-    Examples
-    --------
-    >>> orig_map = ["dog", "cat"]
-    >>> aligned_coco = {
-    ...     "categories": [{"id": 10, "name": "cat"}, {"id": 20, "name": "dog"}],
-    ...     "annotations": [
-    ...         {"id": 1, "category_id": 20},
-    ...         {"id": 2, "category_id": 10}
-    ...     ]
-    ... }
-    >>> verify_alignment(orig_map, aligned_coco, "test_split")
-      -> Data quality assertions passed for test_split split!
     """
     category_map_new = {cat['id']: cat for cat in new_coco.get('categories', [])}
     new_annotations = new_coco.get('annotations', [])
     
-    assert len(orig_mapping) == len(new_annotations), f"Annotation count mismatch in {split_name} split!"
+    assert len(orig_mapping) == len(new_annotations), f"Annotation count mismatch in {dataset_name}!"
     
     for i, ann in enumerate(new_annotations):
         old_cat_name = orig_mapping[i]
         new_cat_name = category_map_new[ann['category_id']]['name']
         assert old_cat_name == new_cat_name, f"Category mapping failed at index {i}: {old_cat_name} != {new_cat_name}"
         
-    print(f"  -> Data quality assertions passed for {split_name} split!")
+    print(f"  -> Data quality assertions passed for dataset '{dataset_name}'!")
 
 
-def process_hierarchical_dataset(data_dir: str, coco_sources: list[str], taxonomy_provider: TaxonomyProvider) -> None:
+def align_coco_dictionaries(coco_dicts: list[dict], taxonomy_provider: TaxonomyProvider) -> tuple[list[dict], dict[str, str]]:
     """
-    The universal orchestration pipeline for fetching, taxonomy expansion, 
-    and dataset alignment of hierarchical imagery datasets.
+    The universal orchestration pipeline for taxonomy expansion and dataset 
+    alignment of hierarchical imagery datasets in pure memory.
 
     Parameters
     ----------
-    data_dir : str
-        The root destination directory where the processed datasets and artifacts will live.
-    coco_sources : list[str]
-        A list of URLs (http://...) or local file paths to the raw COCO JSON files.
+    coco_dicts : list[dict]
+        A list of COCO-formatted dictionaries to be aligned to a single taxonomy.
     taxonomy_provider : TaxonomyProvider
         An instantiated TaxonomyProvider that exposes a `build_master_hierarchy(*dicts)` 
         method, and `hierarchy_tree` / `name_to_id` attributes.
+        
+    Returns
+    -------
+    tuple[list[dict], dict[str, str]]
+        A tuple containing:
+        1. The list of newly aligned COCO dictionaries (in the same order).
+        2. The unified master taxonomic hierarchy tree mapping.
     """
     print(f"\n{'='*50}\nInitializing Dataset Expansion & Alignment\n{'='*50}")
-    print(f"Target Directory: {data_dir}")
     print(f"Taxonomy Provider: {taxonomy_provider.__class__.__name__}")
     
-    # 1. Setup Directories
-    raw_data_dir = os.path.join(data_dir, 'raw_data')
-    hierarchy_dir = os.path.join(data_dir, 'hierarchy_data')
-    
-    for directory in [data_dir, raw_data_dir, hierarchy_dir]:
-        os.makedirs(directory, exist_ok=True)
-        
-    # 2. Fetch/Copy Sources and categorize by split
-    raw_datasets = []
-    
-    for idx, source in enumerate(coco_sources):
-        source_lower = source.lower()
-        if 'val' in source_lower:
-            split = 'val'
-        elif 'test' in source_lower:
-            split = 'test'
-        else:
-            split = 'train'
-            
-        raw_dest = os.path.join(raw_data_dir, f"{split}_{idx}_raw.json")
-        
-        if not os.path.exists(raw_dest):
-            if source.startswith('http://') or source.startswith('https://'):
-                print(f"Downloading {split} data from {source}...")
-                urllib.request.urlretrieve(source, raw_dest)
-            else:
-                print(f"Copying {split} data from {source}...")
-                shutil.copyfile(source, raw_dest)
-                
-        with open(raw_dest, 'r') as f:
-            coco_dict = json.load(f)
-            
-            # Cache original mappings for downstream assertions
-            cat_map = {cat['id']: cat['name'] for cat in coco_dict.get('categories', [])}
-            orig_map = [cat_map[ann['category_id']] for ann in coco_dict.get('annotations', [])]
-            
-            raw_datasets.append({
-                'split': split,
-                'idx': idx,
-                'dict': coco_dict,
-                'orig_map': orig_map
-            })
+    # 1. Cache original mappings for downstream assertions
+    orig_maps = []
+    for c_dict in coco_dicts:
+        cat_map = {cat['id']: cat['name'] for cat in c_dict.get('categories', [])}
+        orig_maps.append([cat_map[ann['category_id']] for ann in c_dict.get('annotations', [])])
 
-    # 3. Build the Master Taxonomy
+    # 2. Build the Master Taxonomy
     print(f"\nBuilding Master Taxonomy using {taxonomy_provider.__class__.__name__}...")
-    all_dicts = [ds['dict'] for ds in raw_datasets]
-    taxonomy_provider.build_master_hierarchy(*all_dicts)
+    taxonomy_provider.build_master_hierarchy(*coco_dicts)
     
-    # 4. Initialize Universal Aligner
+    # 3. Initialize Universal Aligner
     aligner = HierarchicalCocoAligner(
         hierarchy_tree=taxonomy_provider.hierarchy_tree,
         name_to_id=taxonomy_provider.name_to_id
     )
     
-    aligned_paths = {'train': [], 'val': [], 'test': []}
-    
     print("\nAligning independent datasets to master taxonomy...")
-    for ds in raw_datasets:
-        split = ds['split']
-        idx = ds['idx']
-        print(f"  -> Processing {split.capitalize()} subset ({idx})...")
+    aligned_dicts = []
+    for idx, (c_dict, orig_map) in enumerate(zip(coco_dicts, orig_maps)):
+        print(f"  -> Processing dictionary subset ({idx})...")
         
-        aligned_coco = aligner.align_dataset(ds['dict'])
-        
-        # 5. Data Quality Assertions
-        verify_alignment(ds['orig_map'], aligned_coco, f"{split}_{idx}")
-        
-        # Save aligned dataset to main directory for YOLO conversion
-        aligned_path = os.path.join(data_dir, f"{split}_{idx}_aligned.json")
-        with open(aligned_path, 'w') as f:
-            json.dump(aligned_coco, f)
-            
-        aligned_paths[split].append(aligned_path)
+        aligned_coco = aligner.align_dataset(c_dict)
+        verify_alignment(orig_map, aligned_coco, f"subset_{idx}")
+        aligned_dicts.append(aligned_coco)
 
-    # 6. Save Global Artifacts
-    print("\nSaving aligned COCO files and hierarchy artifact...")
-    hierarchy_json_path = os.path.join(hierarchy_dir, 'hierarchy.json')
-    with open(hierarchy_json_path, 'w') as f:
-        json.dump(aligner.hierarchy_tree, f, indent=4)
-    
-    print(f"\nPipeline Complete. Master datasets and models are ready in: {data_dir}")
+    print(f"\nAlignment Complete. Returned {len(aligned_dicts)} aligned dictionaries.")
+    return aligned_dicts, aligner.hierarchy_tree

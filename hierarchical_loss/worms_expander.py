@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import os
-import argparse
-from . import hierarchy_expander
+from .hierarchy_expander import TaxonomyProvider
 from . import worms_utils
 
-class WormsTaxonomyProvider:
+class WormsTaxonomyProvider(TaxonomyProvider):
     """
     A TaxonomyProvider that standardizes and expands species names to a unified 
     WoRMS taxonomy hierarchy via the official API.
@@ -17,25 +13,16 @@ class WormsTaxonomyProvider:
         If True, uses `requests_cache` to transparently intercept WoRMS API calls 
         and save them to a local SQLite database, avoiding repeated/flaky network 
         requests. Default is True.
-        
-    Attributes
-    ----------
-    hierarchy_tree : dict[str, str]
-        A mapping of {child_scientific_name: parent_scientific_name} representing 
-        the full unified taxonomic tree.
-    name_to_id : dict[str, int]
-        A mapping of taxonomic names to their official contiguous model ID.
     """
 
     def __init__(self, use_cache: bool = True) -> None:
+        super().__init__()
+        
         if use_cache:
             import requests_cache
             # Cache expires after 30 days; helps significantly with API rate limiting/flakiness
             requests_cache.install_cache('worms_api_cache', backend='sqlite', expire_after=2592000)
             
-        self.hierarchy_tree: dict[str, str] = {}
-        self.name_to_id: dict[str, int] = {}
-        
         # Internal state for tracking resolution queues
         self._to_lookup: set[str] = set()
         self._deferred: set[str] = set()
@@ -147,50 +134,3 @@ class WormsTaxonomyProvider:
             for orphan in sorted(self._deferred):
                 print(f" - {orphan}")
             print("="*70 + "\n")
-
-
-def expand_and_align_dataset(data_dir: str, coco_sources: list[str]) -> None:
-    """
-    Maintains API compatibility with external orchestrator scripts. 
-    Injects the WormsTaxonomyProvider into the universal hierarchical dataset processor.
-
-    Parameters
-    ----------
-    data_dir : str
-        The root destination directory where the processed datasets and artifacts will live.
-    coco_sources : list[str]
-        A list of URLs (http://...) or local file paths to the raw COCO JSON files.
-
-    Examples
-    --------
-    >>> expand_and_align_dataset(
-    ...     data_dir="./output/gfisher",
-    ...     coco_sources=["http://example.com/train.json"]
-    ... )
-    """
-    provider = WormsTaxonomyProvider(use_cache=True)
-    hierarchy_expander.process_hierarchical_dataset(
-        data_dir=data_dir, 
-        coco_sources=coco_sources, 
-        taxonomy_provider=provider
-    )
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch, expand, and align heterogeneous COCO datasets to a WoRMS taxonomy.")
-    parser.add_argument(
-        '--data_dir', 
-        type=str, 
-        required=True,
-        help="Path to the target root dataset directory (e.g., ~/datasets/gfisher)"
-    )
-    parser.add_argument(
-        '--coco_sources', 
-        type=str, 
-        nargs='+',
-        required=True,
-        help="List of URLs or local file paths to the raw COCO JSON files. Split is inferred from filename (e.g., train/val/test)."
-    )
-    args = parser.parse_args()
-    
-    expand_and_align_dataset(args.data_dir, args.coco_sources)
