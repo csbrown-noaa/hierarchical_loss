@@ -468,4 +468,75 @@ def construct_parent_childtensor_tree(tree: dict[Hashable, Hashable], device=Non
     """
     childset_tree = construct_parent_childset_tree(tree)
     return {k: torch.tensor(list(v), device=device) for k,v  in childset_tree.items()} 
-    
+
+
+def snap_to_vocabulary(
+    batch_results: list[tuple[list[list[int]], list[torch.Tensor]]], 
+    eval_subset_ids: set[int] | list[int] | torch.Tensor | None
+) -> list[tuple[list[list[int]], list[torch.Tensor]]]:
+    """Snaps a batch of paths and scores to an allowed vocabulary tier.
+
+    This function iterates through a batch of path and score lists (typically
+    the output of a truncation function). For each path, it searches backwards
+    from the deepest node to find the first node that exists in the allowed
+    `eval_subset_ids`. It then truncates the path (and corresponding scores)
+    to that node. If no node in the path is in the vocabulary, it returns
+    an empty path.
+
+    Parameters
+    ----------
+    batch_results : list[tuple[list[list[int]], list[torch.Tensor]]]
+        A batch of results, where each item is a tuple containing a list of
+        paths and a list of corresponding score tensors.
+    eval_subset_ids : set[int] | list[int] | torch.Tensor | None
+        A collection of allowed category IDs (the vocabulary). If None, 
+        the original batch_results are returned unmodified.
+
+    Returns
+    -------
+    list[tuple[list[list[int]], list[torch.Tensor]]]
+        A list of the same structure as `batch_results`, but with paths and
+        scores snapped to the specified vocabulary.
+
+    Examples
+    --------
+    >>> import torch
+    >>> batch = [([[0, 1, 4], [0, 2, 5]], [torch.tensor([0.9, 0.8, 0.4]), torch.tensor([0.9, 0.7, 0.6])])]
+    >>> vocab = {0, 1, 2}
+    >>> res = snap_to_vocabulary(batch, vocab)
+    >>> res[0][0]
+    [[0, 1], [0, 2]]
+    >>> res[0][1]
+    [tensor([0.9000, 0.8000]), tensor([0.9000, 0.7000])]
+    """
+    if eval_subset_ids is None:
+        return batch_results
+
+    if isinstance(eval_subset_ids, torch.Tensor):
+        eval_subset_ids = eval_subset_ids.tolist()
+    eval_subset_set = set(eval_subset_ids)
+
+    snapped_results = []
+    for p_list, s_list in batch_results:
+        new_p_list = []
+        new_s_list = []
+        for path, score_path in zip(p_list, s_list):
+            valid_idx = -1
+            # Walk backward from the deepest node to find an allowed vocabulary hit
+            for i in range(len(path) - 1, -1, -1):
+                if path[i] in eval_subset_set:
+                    valid_idx = i
+                    break
+            if valid_idx != -1:
+                new_p_list.append(path[:valid_idx+1])
+                new_s_list.append(score_path[:valid_idx+1])
+            else:
+                new_p_list.append([]) # Completely invalid path
+                # Provide an empty tensor matching the input device and dtype
+                if isinstance(score_path, torch.Tensor):
+                    new_s_list.append(torch.tensor([], device=score_path.device, dtype=score_path.dtype))
+                else:
+                    new_s_list.append([]) 
+        snapped_results.append((new_p_list, new_s_list))
+        
+    return snapped_results
